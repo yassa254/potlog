@@ -1,0 +1,3705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="pragma" content="no-cache" />
+  <meta http-equiv="expires" content="-1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AirPulse // MikroTik Hotspot Login</title>
+  <meta name="description" content="Technical wireframe hotspot portal with M-Pesa STK push and voucher authentication for MikroTik RouterOS.">
+
+  <!-- Index Meta & Display Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Self-Contained Stylesheet (No External Dependencies) -->
+  <style>
+/* ==========================================================================
+   Index — Style Reference Implementation
+   "Blueprint on a backlit drafting table — wireframe drawing with periwinkle annotation"
+   ========================================================================== */
+
+:root {
+  /* Colors — Achromatic Stack + Periwinkle Annotation */
+  --color-void: #000000;
+  --color-carbon: #1c1c1c;
+  --color-graphite: #4d4d4d;
+  --color-steel: #808080;
+  --color-ash: #ababab;
+  --color-paper: #ffffff;
+  --color-periwinkle-annotation: #7089ba;
+
+  /* Surfaces */
+  --surface-void-canvas: #000000;
+  --surface-carbon-surface: #1c1c1c;
+  --surface-periwinkle-wash: #7089ba;
+
+  /* Typography — Font Families */
+  --font-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-raveo-variable: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-geist-mono: "JetBrains Mono", "SF Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  /* Typography — Scale */
+  --text-caption: 12px;
+  --leading-caption: 1.2;
+  --tracking-caption: 0px;
+
+  --text-body-sm: 14px;
+  --leading-body-sm: 1.6;
+  --tracking-body-sm: -0.14px;
+
+  --text-body: 16px;
+  --leading-body: 1.6;
+  --tracking-body: -0.16px;
+
+  --text-subheading: 24px;
+  --leading-subheading: 1.4;
+  --tracking-subheading: -0.24px;
+
+  --text-heading: 32px;
+  --leading-heading: 1.2;
+  --tracking-heading: -0.32px;
+
+  --text-display: clamp(32px, 3.8vw, 56px);
+  --leading-display: 1.08;
+  --tracking-display: -0.04em;
+
+  /* Typography — Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-w1000: 900; /* Signature blocky silhouette */
+
+  /* Spacing */
+  --spacing-4: 4px;
+  --spacing-6: 6px;
+  --spacing-8: 8px;
+  --spacing-10: 10px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-18: 18px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+
+  /* Border Radii */
+  --radius-nav: 6px;
+  --radius-tags: 100px;
+  --radius-buttons: 100px;
+  --radius-featuretiles: 20px;
+  --radius-iconcontainers: 50px;
+
+  /* Blueprint Hairline Dashes */
+  --border-dashed-carbon: 1px dashed var(--color-graphite);
+  --border-dashed-light: 1px dashed var(--color-carbon);
+  --border-dashed-white: 1px dashed var(--color-paper);
+  --border-solid-paper: 1px solid var(--color-paper);
+  --border-solid-graphite: 1px solid var(--color-graphite);
+
+  /* Compatibility aliases */
+  --bg-page: var(--color-void);
+  --bg-header: var(--color-carbon);
+  --bg-card: var(--color-carbon);
+  --mpesa-green: var(--color-paper);
+}
+
+/* --------------------------------------------------------------------------
+   Reset & Strict Viewport Containment (Single Screen Fit, Zero Scroll)
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: var(--color-void);
+  color: var(--color-paper);
+  font-family: var(--font-raveo-variable);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Blueprint Drafting Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-carbon);
+  border-radius: 4px;
+  border: 1px solid var(--color-graphite);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-periwinkle-annotation);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-graphite) var(--color-void);
+}
+
+.single-page-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  justify-content: space-between;
+  background-color: var(--color-void);
+}
+
+/* --------------------------------------------------------------------------
+   Top Navigation — Blueprint Drafting Chrome
+   -------------------------------------------------------------------------- */
+.app-header {
+  height: 52px;
+  min-height: 52px;
+  background-color: var(--color-carbon);
+  border-bottom: 1px dashed var(--color-graphite);
+  display: flex;
+  align-items: center;
+  z-index: 100;
+  width: 100%;
+}
+
+.nav-container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-20);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+}
+
+/* Brand Wordmark & Bracket Monogram */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-10);
+  text-decoration: none;
+  color: var(--color-paper);
+}
+
+.brand-bracket-mark {
+  font-family: var(--font-geist-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-periwinkle-annotation);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.brand-title {
+  font-size: 15px;
+  font-weight: var(--font-weight-w1000);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.brand-slash {
+  color: var(--color-graphite);
+  margin: 0 4px;
+}
+
+.brand-subtag {
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-steel);
+  text-transform: uppercase;
+}
+
+/* Blueprint Hardware Telemetry Chip */
+.hardware-telemetry-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  border-radius: var(--radius-tags);
+  padding: 3px 12px;
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--color-ash);
+  text-transform: uppercase;
+}
+
+.node-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-periwinkle-annotation);
+}
+
+.chip-sep {
+  color: var(--color-graphite);
+}
+
+.chip-val {
+  color: var(--color-paper);
+}
+
+.chip-accent {
+  color: var(--color-periwinkle-annotation);
+}
+
+/* Outlined Pill Action Buttons */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+.btn-pill-outlined {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-6);
+  padding: 6px 16px;
+  border-radius: var(--radius-buttons);
+  border: 1px solid var(--color-paper);
+  background: transparent;
+  color: var(--color-paper);
+  font-size: var(--text-body-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-raveo-variable);
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 140ms ease, color 140ms ease, transform 100ms ease;
+  white-space: nowrap;
+}
+
+.btn-pill-outlined:hover {
+  background-color: var(--color-paper);
+  color: var(--color-void);
+}
+
+.btn-pill-outlined:active {
+  transform: scale(0.97);
+}
+
+.btn-pill-ghost {
+  border-color: transparent;
+  color: var(--color-ash);
+}
+
+.btn-pill-ghost:hover {
+  background: transparent;
+  color: var(--color-paper);
+}
+
+/* --------------------------------------------------------------------------
+   Hero Drafting Canvas with Desk Lamp Radial Light Wash
+   -------------------------------------------------------------------------- */
+.single-page-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(16px, 3vh, 36px) clamp(12px, 2vw, 24px);
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  background: radial-gradient(ellipse 900px 500px at 50% 25%, #1c1c1c 0%, #000000 75%);
+}
+
+.portal-blueprint-container {
+  width: 100%;
+  max-width: 1220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+/* Section Container — 1px Dashed Blueprint Primitive */
+.dashed-section-primitive {
+  border: 1px dashed var(--color-graphite);
+  background-color: var(--color-carbon);
+  padding: clamp(14px, 2vh, 24px) clamp(16px, 2vw, 24px);
+  position: relative;
+}
+
+/* Corner Drafting Marks */
+.dashed-section-primitive::before,
+.dashed-section-primitive::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: var(--color-periwinkle-annotation);
+  pointer-events: none;
+}
+
+.dashed-section-primitive::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1px solid var(--color-periwinkle-annotation);
+  border-left: 1px solid var(--color-periwinkle-annotation);
+}
+
+.dashed-section-primitive::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1px solid var(--color-periwinkle-annotation);
+  border-right: 1px solid var(--color-periwinkle-annotation);
+}
+
+/* Hero Typography & Eyebrow */
+.blueprint-header-stack {
+  text-align: center;
+  margin-bottom: clamp(10px, 1.8vh, 18px);
+}
+
+.eyebrow-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  padding: 4px 12px;
+  border-radius: var(--radius-tags);
+  border: 1px dashed var(--color-paper);
+  background-color: var(--color-void);
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-paper);
+  margin-bottom: var(--spacing-8);
+}
+
+.eyebrow-pen {
+  color: var(--color-periwinkle-annotation);
+}
+
+.blueprint-display-headline {
+  font-size: var(--text-display);
+  font-weight: var(--font-weight-w1000);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--color-paper);
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-6);
+}
+
+.blueprint-subtext {
+  font-size: var(--text-body-sm);
+  line-height: 1.45;
+  color: var(--color-steel);
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   6 Compact Button Cards Grid (Index Blueprint Wireframe Style)
+   -------------------------------------------------------------------------- */
+.blueprint-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: clamp(8px, 1vw, 12px);
+  width: 100%;
+}
+
+/* Individual Schematic Card */
+.blueprint-card {
+  background-color: var(--color-carbon);
+  border: 1px dashed var(--color-graphite);
+  padding: clamp(10px, 1.6vh, 16px) clamp(10px, 1vw, 14px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  transition: border-color 140ms ease, background-color 140ms ease, transform 100ms ease;
+  min-height: clamp(180px, 26vh, 220px);
+}
+
+.blueprint-card:hover {
+  border-color: var(--color-periwinkle-annotation);
+  background-color: #222222;
+}
+
+.blueprint-card:active {
+  transform: scale(0.97);
+}
+
+.blueprint-card:focus-visible {
+  border-color: var(--color-paper);
+}
+
+/* Card Header Tag */
+.card-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-6);
+}
+
+.card-mono-tag {
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-periwinkle-annotation);
+}
+
+.card-annotation-badge {
+  font-family: var(--font-geist-mono);
+  font-size: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: var(--radius-tags);
+  border: 1px dashed var(--color-periwinkle-annotation);
+  color: var(--color-periwinkle-annotation);
+  background-color: var(--color-void);
+}
+
+.card-annotation-badge.starter-badge {
+  border-color: #78d496;
+  color: #78d496;
+}
+
+.card-duration-title {
+  font-size: 15px;
+  font-weight: var(--font-weight-w1000);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+/* Big Raveo 1000 Price Display */
+.card-price-block {
+  margin: clamp(4px, 0.8vh, 10px) 0;
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.price-currency {
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-steel);
+}
+
+.price-integer {
+  font-size: clamp(28px, 3.4vw, 36px);
+  font-weight: var(--font-weight-w1000);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--color-paper);
+}
+
+/* Specs & Metadata */
+.card-specs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: clamp(8px, 1.2vh, 14px);
+}
+
+.spec-line {
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  color: var(--color-ash);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.spec-line .dot {
+  color: var(--color-periwinkle-annotation);
+}
+
+.spec-desc {
+  font-size: 11px;
+  color: var(--color-steel);
+}
+
+/* Outlined Pill Action Inside Card */
+.btn-card-action {
+  width: 100%;
+  padding: 7px 12px;
+  border-radius: var(--radius-buttons);
+  border: 1px solid var(--color-paper);
+  background: transparent;
+  color: var(--color-paper);
+  font-family: var(--font-raveo-variable);
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.btn-card-action:hover {
+  background-color: var(--color-paper);
+  color: var(--color-void);
+}
+
+.btn-card-action:active {
+  transform: scale(0.96);
+}
+
+/* --------------------------------------------------------------------------
+   Blueprint Footer (~34px)
+   -------------------------------------------------------------------------- */
+.app-footer {
+  height: 34px;
+  min-height: 34px;
+  background-color: var(--color-carbon);
+  border-top: 1px dashed var(--color-graphite);
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: var(--color-steel);
+  width: 100%;
+}
+
+.footer-container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-20);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-schematic-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+}
+
+.footer-btn-link, .footer-a-link {
+  background: none;
+  border: none;
+  color: var(--color-steel);
+  font-size: 11px;
+  font-family: var(--font-raveo-variable);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.footer-btn-link:hover, .footer-a-link:hover {
+  color: var(--color-paper);
+}
+
+/* --------------------------------------------------------------------------
+   M-Pesa Modal Dialogs (Blueprint Wireframe Style)
+   -------------------------------------------------------------------------- */
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background-color: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 10px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.sheet-scrim.active {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.sheet-container {
+  margin: auto;
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: var(--color-carbon);
+  border: 1px dashed var(--color-graphite);
+  padding: clamp(14px, 3vw, 24px);
+  position: relative;
+  transform: translateY(12px) scale(0.97);
+  transition: transform 180ms ease;
+  box-sizing: border-box;
+}
+
+.sheet-scrim.active .sheet-container {
+  transform: translateY(0) scale(1);
+}
+
+.sheet-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-buttons);
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  color: var(--color-steel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+
+.sheet-close-btn:hover {
+  border-color: var(--color-paper);
+  color: var(--color-paper);
+}
+
+.sheet-close-btn:active {
+  transform: scale(0.92);
+}
+
+/* Header in Modal */
+.modal-blueprint-header {
+  margin-bottom: var(--spacing-16);
+}
+
+.modal-chip {
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--color-periwinkle-annotation);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-4);
+  display: block;
+}
+
+.sheet-title {
+  font-size: var(--text-subheading);
+  font-weight: var(--font-weight-w1000);
+  letter-spacing: -0.02em;
+  color: var(--color-paper);
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+
+.sheet-desc {
+  font-size: var(--text-caption);
+  color: var(--color-steel);
+  margin-top: 3px;
+}
+
+/* Plan Summary Box */
+.modal-summary-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  padding: 10px 14px;
+  margin-bottom: var(--spacing-16);
+}
+
+.sum-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.sum-label {
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--color-steel);
+}
+
+.sum-value {
+  font-size: 13px;
+  font-weight: var(--font-weight-w1000);
+  color: var(--color-paper);
+}
+
+.sum-price {
+  font-size: 17px;
+  font-weight: var(--font-weight-w1000);
+  color: var(--color-periwinkle-annotation);
+}
+
+/* Input Styles */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--spacing-12);
+  text-align: left;
+}
+
+.input-label {
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--color-steel);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 12px;
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  color: var(--color-steel);
+  pointer-events: none;
+}
+
+.blueprint-input {
+  width: 100%;
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  border-radius: var(--radius-nav);
+  padding: 9px 12px;
+  font-family: var(--font-geist-mono);
+  font-size: 13px;
+  color: var(--color-paper);
+  outline: none;
+  transition: border-color 140ms ease;
+}
+
+.blueprint-input.with-prefix {
+  padding-left: 80px;
+}
+
+.blueprint-input:focus {
+  border-color: var(--color-paper);
+  border-style: solid;
+}
+
+.input-helper {
+  font-size: 11px;
+  color: var(--color-ash);
+}
+
+/* Device Notice Box */
+.device-bind-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  color: var(--color-ash);
+  margin-bottom: var(--spacing-16);
+}
+
+.bind-node {
+  color: var(--color-periwinkle-annotation);
+}
+
+/* Big Blueprint Action Button */
+.btn-submit-blueprint {
+  width: 100%;
+  padding: 10px 18px;
+  border-radius: var(--radius-buttons);
+  border: 1px solid var(--color-paper);
+  background: transparent;
+  color: var(--color-paper);
+  font-family: var(--font-raveo-variable);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 140ms ease, color 140ms ease, transform 100ms ease;
+}
+
+.btn-submit-blueprint:hover {
+  background-color: var(--color-paper);
+  color: var(--color-void);
+}
+
+.btn-submit-blueprint:active {
+  transform: scale(0.97);
+}
+
+/* --------------------------------------------------------------------------
+   Step 2: Processing Schematic
+   -------------------------------------------------------------------------- */
+.sheet-step-view {
+  display: none;
+}
+
+.sheet-step-view.active {
+  display: block;
+}
+
+.processing-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.wireframe-radar-node {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px dashed var(--color-periwinkle-annotation);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  color: var(--color-periwinkle-annotation);
+  margin-bottom: var(--spacing-16);
+}
+
+.processing-title {
+  font-size: 18px;
+  font-weight: var(--font-weight-w1000);
+  letter-spacing: -0.02em;
+  color: var(--color-paper);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.processing-desc {
+  font-size: 12px;
+  color: var(--color-steel);
+  max-width: 320px;
+  margin-bottom: var(--spacing-16);
+}
+
+.blueprint-progress-track {
+  width: 100%;
+  height: 4px;
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  margin-bottom: var(--spacing-16);
+  position: relative;
+}
+
+.blueprint-progress-fill {
+  width: 0%;
+  height: 100%;
+  background-color: var(--color-periwinkle-annotation);
+  transition: width 300ms ease;
+}
+
+.processing-steps-log {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.step-log-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  color: var(--color-steel);
+}
+
+.step-log-item .step-node {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-graphite);
+}
+
+.step-log-item.active {
+  color: var(--color-paper);
+}
+
+.step-log-item.active .step-node {
+  background-color: var(--color-periwinkle-annotation);
+}
+
+.step-log-item.completed {
+  color: var(--color-periwinkle-annotation);
+}
+
+.step-log-item.completed .step-node {
+  background-color: var(--color-periwinkle-annotation);
+}
+
+/* --------------------------------------------------------------------------
+   Step 3: Connected State
+   -------------------------------------------------------------------------- */
+.success-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.success-check-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-periwinkle-annotation);
+  color: var(--color-periwinkle-annotation);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: var(--spacing-12);
+}
+
+.success-title {
+  font-size: 20px;
+  font-weight: var(--font-weight-w1000);
+  text-transform: uppercase;
+  color: var(--color-paper);
+  margin-bottom: 4px;
+}
+
+.success-desc {
+  font-size: 12px;
+  color: var(--color-steel);
+  max-width: 320px;
+  margin-bottom: var(--spacing-16);
+}
+
+.receipt-card {
+  width: 100%;
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--spacing-16);
+  text-align: left;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--color-steel);
+}
+
+.receipt-code-highlight {
+  font-family: var(--font-geist-mono);
+  font-size: 13px;
+  color: var(--color-periwinkle-annotation);
+}
+
+/* --------------------------------------------------------------------------
+   Voucher & FAQ Modals
+   -------------------------------------------------------------------------- */
+.blueprint-tab-bar {
+  display: flex;
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  padding: 2px;
+  margin-bottom: var(--spacing-16);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-steel);
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.tab-btn.active {
+  background-color: var(--color-carbon);
+  color: var(--color-paper);
+}
+
+.login-tab-panel {
+  display: none;
+  flex-direction: column;
+}
+
+.login-tab-panel.active {
+  display: flex;
+}
+
+.faq-list-blueprint {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: var(--spacing-12);
+  text-align: left;
+}
+
+.faq-schematic-item {
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  padding: 10px 14px;
+}
+
+.faq-schematic-item strong {
+  display: block;
+  font-size: 13px;
+  font-weight: var(--font-weight-w1000);
+  color: var(--color-paper);
+  margin-bottom: 3px;
+}
+
+.faq-schematic-item p {
+  font-size: 12px;
+  color: var(--color-steel);
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Connected Bottom Dock
+   -------------------------------------------------------------------------- */
+.connected-dock-pill {
+  position: fixed;
+  bottom: 42px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  padding: 8px 16px;
+  background-color: var(--color-carbon);
+  border: 1px dashed var(--color-periwinkle-annotation);
+  border-radius: var(--radius-buttons);
+  transition: transform 220ms ease;
+  min-width: 320px;
+}
+
+.connected-dock-pill.visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+.dock-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.active-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-periwinkle-annotation);
+}
+
+.dock-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.dock-title {
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.dock-timer {
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  color: var(--color-periwinkle-annotation);
+}
+
+.dock-btn-logout {
+  padding: 4px 12px;
+  border-radius: var(--radius-buttons);
+  background: transparent;
+  border: 1px solid var(--color-graphite);
+  color: var(--color-steel);
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.dock-btn-logout:hover {
+  border-color: var(--color-paper);
+  color: var(--color-paper);
+}
+
+/* --------------------------------------------------------------------------
+   Real-Time Payment Gateway & Bank Settlement Specific Components
+   -------------------------------------------------------------------------- */
+.gateway-channel-selector,
+.tuma-channel-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  padding: 4px;
+  margin-bottom: var(--spacing-16);
+}
+
+.gateway-channel-btn,
+.tuma-channel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-steel);
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 140ms ease;
+}
+
+.gateway-channel-btn.active,
+.tuma-channel-btn.active {
+  background-color: var(--color-carbon);
+  color: var(--color-paper);
+  border-color: var(--color-periwinkle-annotation);
+}
+
+.gateway-channel-btn:hover:not(.active),
+.tuma-channel-btn:hover:not(.active) {
+  color: var(--color-ash);
+}
+
+.bank-details-card {
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-periwinkle-annotation);
+  padding: 12px 14px;
+  margin-bottom: var(--spacing-14);
+  font-size: 11px;
+}
+
+.bank-card-title {
+  font-family: var(--font-geist-mono);
+  font-size: 9px;
+  color: var(--color-periwinkle-annotation);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bank-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.bank-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.bank-info-label {
+  font-size: 9px;
+  color: var(--color-steel);
+  font-family: var(--font-geist-mono);
+}
+
+.bank-info-val {
+  font-size: 12px;
+  color: var(--color-paper);
+  font-weight: 600;
+  font-family: var(--font-geist-mono);
+}
+
+.blueprint-select {
+  width: 100%;
+  background-color: var(--color-void);
+  border: 1px dashed var(--color-graphite);
+  color: var(--color-paper);
+  padding: 10px 14px;
+  font-family: var(--font-sans-serif);
+  font-size: 13px;
+  outline: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color 140ms ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23808080' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.blueprint-select:focus {
+  border-color: var(--color-periwinkle-annotation);
+}
+
+.gateway-badge,
+.tuma-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-geist-mono);
+  font-size: 8px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background-color: rgba(112, 137, 186, 0.15);
+  border: 1px solid var(--color-periwinkle-annotation);
+  color: var(--color-paper);
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Adaptations — Fit All Screen Sizes (Desktop down to 320px Mobile)
+   -------------------------------------------------------------------------- */
+
+/* Safe area insets for iOS notch & home indicators */
+body {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* 7 Plans Desktop Layout (>= 1320px) */
+@media (min-width: 1320px) {
+  .blueprint-cards-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+  }
+  .blueprint-card {
+    min-height: 200px;
+  }
+}
+
+/* Medium Desktop / Laptop (1080px - 1319px) */
+@media (max-width: 1319px) and (min-width: 1080px) {
+  .blueprint-cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .blueprint-card {
+    min-height: 190px;
+  }
+}
+
+/* Tablets (768px - 1079px) */
+@media (max-width: 1079px) and (min-width: 768px) {
+  .nav-container {
+    padding: 0 16px;
+    gap: 10px;
+  }
+
+  .hardware-telemetry-chip {
+    font-size: 8px;
+    padding: 2px 8px;
+  }
+
+  .blueprint-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .blueprint-card {
+    min-height: 175px;
+    padding: 12px;
+  }
+
+  .blueprint-display-headline {
+    font-size: clamp(26px, 3.5vw, 36px);
+  }
+}
+
+/* Mobile & Small Tablets (481px - 767px) */
+@media (max-width: 767px) and (min-width: 481px) {
+  .app-header {
+    height: auto;
+    padding: 8px 0;
+  }
+
+  .nav-container {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .hardware-telemetry-chip {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    font-size: 8px;
+    padding: 4px 8px;
+  }
+
+  .nav-actions {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .btn-pill-outlined {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-height: 38px;
+  }
+
+  .blueprint-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .blueprint-card:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+
+  .blueprint-card {
+    min-height: 160px;
+    padding: 10px;
+  }
+
+  .price-integer {
+    font-size: 24px;
+  }
+
+  .blueprint-display-headline {
+    font-size: 26px;
+  }
+
+  .blueprint-subtext {
+    font-size: 12px;
+  }
+
+  .sheet-container {
+    width: 95%;
+    padding: 16px;
+  }
+
+  .app-footer {
+    height: auto;
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    padding: 12px;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input.blueprint-input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Standard Phone Layout (381px - 480px, e.g. iPhone 12/13/14/15/16, Galaxy S/A) */
+@media (max-width: 480px) and (min-width: 381px) {
+  .app-header {
+    height: auto;
+    padding: 8px 0;
+  }
+
+  .nav-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .nav-brand {
+    justify-content: center;
+  }
+
+  .hardware-telemetry-chip {
+    font-size: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 4px 8px;
+    line-height: 1.4;
+    text-align: center;
+    word-break: break-all;
+  }
+
+  .nav-actions {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .btn-pill-outlined {
+    padding: 6px 8px;
+    font-size: 11px;
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+    min-height: 38px;
+  }
+
+  .single-page-main {
+    padding: 12px 6px;
+  }
+
+  .dashed-section-primitive {
+    padding: 12px 10px;
+  }
+
+  .blueprint-display-headline {
+    font-size: clamp(20px, 5.5vw, 24px);
+    line-height: 1.15;
+  }
+
+  .blueprint-subtext {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .blueprint-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .blueprint-card:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+
+  .blueprint-card {
+    min-height: 145px;
+    padding: 8px 6px;
+    min-width: 0;
+  }
+
+  .card-duration-title {
+    font-size: 13px;
+  }
+
+  .price-integer {
+    font-size: 20px;
+  }
+
+  .spec-line, .spec-desc {
+    font-size: 9px;
+  }
+
+  .btn-card-action {
+    font-size: 10.5px;
+    padding: 6px 4px;
+    min-height: 34px;
+  }
+
+  .sheet-container {
+    width: 98%;
+    padding: 14px;
+  }
+
+  .modal-summary-box {
+    padding: 8px 10px;
+  }
+
+  .connected-dock-pill {
+    width: calc(100% - 16px);
+    bottom: max(10px, env(safe-area-inset-bottom, 10px));
+    padding: 6px 10px;
+  }
+
+  .app-footer {
+    height: auto;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+    padding: 10px;
+    font-size: 10px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  input.blueprint-input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Small Android and iPhone Devices (<= 380px down to 320px) */
+/* Targets iPhone SE 1st gen (320px), Galaxy Fold cover (320px-340px), small budget Androids */
+@media (max-width: 380px) {
+  .app-header {
+    height: auto;
+    padding: 6px 0;
+  }
+
+  .nav-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 0 8px;
+  }
+
+  .nav-brand {
+    justify-content: center;
+  }
+
+  .brand-title {
+    font-size: 13px;
+  }
+
+  .brand-subtag {
+    font-size: 8px;
+  }
+
+  .hardware-telemetry-chip {
+    font-size: 7.5px;
+    padding: 3px 6px;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    word-break: break-all;
+    line-height: 1.35;
+  }
+
+  .nav-actions {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .btn-pill-outlined {
+    padding: 6px 4px;
+    font-size: 10px;
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+    min-height: 38px;
+  }
+
+  .single-page-main {
+    padding: 8px 4px;
+  }
+
+  .dashed-section-primitive {
+    padding: 10px 8px;
+  }
+
+  .blueprint-display-headline {
+    font-size: 19px;
+    line-height: 1.15;
+  }
+
+  .blueprint-subtext {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  /* Single-column ergonomic mobile card list for small devices */
+  .blueprint-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .blueprint-card {
+    min-height: auto;
+    padding: 10px 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .blueprint-card > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-header-bar {
+    margin-bottom: 2px;
+  }
+
+  .card-duration-title {
+    font-size: 14px;
+  }
+
+  .card-price-block {
+    margin: 2px 0;
+  }
+
+  .price-integer {
+    font-size: 20px;
+  }
+
+  .card-specs-list {
+    margin-bottom: 0;
+  }
+
+  .spec-line, .spec-desc {
+    font-size: 9.5px;
+  }
+
+  .btn-card-action {
+    width: auto;
+    min-width: 90px;
+    white-space: nowrap;
+    padding: 8px 10px;
+    font-size: 11px;
+    min-height: 40px;
+    flex-shrink: 0;
+  }
+
+  .sheet-container {
+    width: 100%;
+    padding: 12px 10px;
+    max-height: calc(100dvh - 20px);
+  }
+
+  .sheet-title {
+    font-size: 17px;
+  }
+
+  .sheet-desc {
+    font-size: 11px;
+  }
+
+  .modal-summary-box {
+    padding: 6px 8px;
+  }
+
+  .receipt-card {
+    padding: 8px 10px;
+    gap: 4px;
+  }
+
+  .receipt-row {
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .receipt-row strong {
+    font-size: 11px;
+    word-break: break-all;
+  }
+
+  .connected-dock-pill {
+    width: calc(100% - 12px);
+    bottom: max(8px, env(safe-area-inset-bottom, 8px));
+    padding: 6px 8px;
+    gap: 6px;
+  }
+
+  .dock-title {
+    font-size: 9px;
+  }
+
+  .dock-timer {
+    font-size: 11px;
+  }
+
+  .dock-btn-logout {
+    padding: 4px 8px;
+    font-size: 10px;
+    min-height: 32px;
+  }
+
+  .app-footer {
+    height: auto;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+    padding: 8px;
+    font-size: 9.5px;
+  }
+
+  input.blueprint-input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+.hotspot-error-banner {
+  display: none;
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px dashed #c45c5c;
+  color: #ffb4b4;
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  word-break: break-word;
+}
+
+.admin-login-card {
+  max-width: 520px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.admin-login-form {
+  margin-top: 8px;
+}
+
+.admin-login-error {
+  margin: 0 0 12px;
+  color: #ffb4b4;
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   MikroTik Hotspot8 Integration Styles: Trial, Errors, Quick Auth
+   ========================================================================== */
+.btn-trial-pill {
+  border-color: #38bdf8 !important;
+  color: #7dd3fc !important;
+  background: rgba(56, 189, 248, 0.08);
+}
+.btn-trial-pill:hover {
+  background: #38bdf8 !important;
+  color: #000000 !important;
+}
+.trial-banner-box {
+  margin: 14px 0 6px;
+  padding: 10px 14px;
+  border: 1px dashed #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  color: #bae6fd;
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-radius: 4px;
+}
+.trial-banner-box a.trial-link {
+  color: #38bdf8;
+  font-weight: 600;
+  text-decoration: underline;
+  padding: 4px 8px;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+.trial-banner-box a.trial-link:hover {
+  background: #38bdf8;
+  color: #000;
+  text-decoration: none;
+}
+.quick-auth-card {
+  margin-top: 18px;
+  padding: 14px 18px;
+  border: 1px dashed var(--color-graphite);
+  background: rgba(28, 28, 28, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-radius: 4px;
+}
+.quick-auth-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-ash);
+}
+.quick-auth-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-periwinkle-annotation);
+  display: inline-block;
+}
+.quick-auth-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+  </style>
+</head>
+<body class="single-page-body">
+
+  <!-- =========================================================================
+       MikroTik RouterOS Forms & Authentication Handlers (Referenced from hotspot8)
+       ========================================================================= -->
+  $(if chap-id)
+  <form name="sendin" action="$(link-login-only)" method="post" style="display:none;" aria-hidden="true">
+    <input type="hidden" name="username" />
+    <input type="hidden" name="password" />
+    <input type="hidden" name="dst" value="$(link-orig)" />
+    <input type="hidden" name="popup" value="true" />
+  </form>
+  <script type="text/javascript">
+  <!--
+  function doChapLogin(u, p) {
+    if (!document.sendin) return false;
+    document.sendin.username.value = u;
+    document.sendin.password.value = hexMD5('$(chap-id)' + p + '$(chap-challenge)');
+    document.sendin.submit();
+    return true;
+  }
+  //-->
+  </script>
+  $(endif)
+
+  <!-- MikroTik Standard PAP / Direct Submission Form -->
+  <form name="login" id="mikrotik-login-form" action="$(link-login-only)" method="post" style="display:none;" aria-hidden="true">
+    <input type="hidden" name="username" id="mt-username" value="$(username)">
+    <input type="hidden" name="password" id="mt-password" value="">
+    <input type="hidden" name="dst" value="$(link-orig)">
+    <input type="hidden" name="popup" value="true">
+  </form>
+
+  <!-- Top Navigation (Blueprint Drafting Chrome) -->
+  <header class="app-header">
+    <div class="nav-container">
+      
+      <!-- Brand Logo Wordmark + Bracket Monogram -->
+      <a href="login.html" class="nav-brand" aria-label="AirPulse Hotspot">
+        <span class="brand-bracket-mark">[ &bull; ]</span>
+        <span class="brand-title">AirPulse</span>
+        <span class="brand-slash">/</span>
+        <span class="brand-subtag">Hotspot 5G</span>
+      </a>
+
+      <!-- Hardware Telemetry Chip (MikroTik RouterOS Live Variables) -->
+      <div class="hardware-telemetry-chip">
+        <span class="node-dot"></span>
+        <span>SYS // 5GHZ</span>
+        <span class="chip-sep">:</span>
+        <span>IP: <strong class="chip-val" id="nav-ip-display">$(ip)</strong></span>
+        <span class="chip-sep">&bull;</span>
+        <span>MAC: <strong class="chip-val" id="nav-mac-display">$(mac)</strong></span>
+        <span class="chip-sep">&bull;</span>
+        <span class="chip-accent">LINKED</span>
+      </div>
+
+      <!-- Action Outlined Pill Buttons -->
+      <div class="nav-actions">
+        $(if trial == 'yes')
+        <a href="$(link-login-only)?dst=$(link-orig-esc)&amp;username=T-$(mac-esc)" class="btn-pill-outlined btn-trial-pill" title="Claim Free Trial Access">
+          <span>Free Trial</span>
+        </a>
+        $(endif)
+
+        <button class="btn-pill-outlined btn-pill-ghost" id="btn-open-gateway-test" title="Test Live MikroTik Connection">
+          <span>Test Router</span>
+        </button>
+
+        <button class="btn-pill-outlined btn-pill-ghost" id="btn-open-voucher">
+          <span>Voucher Code</span>
+        </button>
+
+        <button class="btn-pill-outlined" id="btn-nav-login">
+          <span>Login</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Hero Drafting Canvas with Radial Light Wash (Fits on 1 Screen Without Scroll) -->
+  <main class="single-page-main">
+    <div class="portal-blueprint-container">
+      
+      <!-- Dashed Section Container (Primary Layout Primitive) -->
+      <div class="dashed-section-primitive">
+        
+        <!-- Header Stack -->
+        <div class="blueprint-header-stack">
+          <div class="eyebrow-chip">
+            <span class="eyebrow-pen">&bull;</span>
+            <span>AIRPULSE v2.0 // MIKROTIK HOTSPOT GATEWAY</span>
+          </div>
+          <h1 class="blueprint-display-headline">CONNECT YOUR DEVICE.</h1>
+          <p class="blueprint-subtext">
+            Select an allocation pass below. Instant M-Pesa STK push or voucher PIN registers your device MAC directly with the gateway in real-time.
+          </p>
+
+          <!-- MikroTik Error Notice Banner from hotspot8 -->
+          $(if error)
+          <div class="hotspot-error-banner" id="mt-error-banner" style="display:block;">
+            <span style="font-weight:700;">[GATEWAY NOTICE]</span> $(error)
+          </div>
+          $(endif)
+
+          <!-- MikroTik Free Trial Banner from hotspot8 -->
+          $(if trial == 'yes')
+          <div class="trial-banner-box">
+            <span>&#9889; Free trial internet access is available on this hotspot.</span>
+            <a href="$(link-login-only)?dst=$(link-orig-esc)&amp;username=T-$(mac-esc)" class="trial-link">Click here to start Free Trial &rarr;</a>
+          </div>
+          $(endif)
+        </div>
+
+        <!-- 7 Compact Button Cards (Schematic Wireframe Style) -->
+        <section class="blueprint-cards-grid" id="pricing-grid">
+
+          <!-- Card 0: 10 for 3 Hours (Starter) -->
+          <article class="blueprint-card" data-plan-id="plan-3h" data-price="10" data-duration="3 Hours" tabindex="0">
+            <div>
+              <div class="card-header-bar">
+                <span class="card-mono-tag">PASS // 3H</span>
+                <span class="card-annotation-badge">STARTER</span>
+              </div>
+              <h3 class="card-duration-title">3 Hours</h3>
+              
+              <div class="card-price-block">
+                <span class="price-currency">KES</span>
+                <span class="price-integer">10</span>
+              </div>
+
+              <div class="card-specs-list">
+                <div class="spec-line"><span class="dot">&bull;</span> 5M / 5M Rate Limit</div>
+                <div class="spec-desc">3-Hour Quick Pass</div>
+              </div>
+            </div>
+
+            <button class="btn-card-action" data-select-plan="plan-3h">
+              <span>Select 10 KES</span>
+            </button>
+          </article>
+
+          <!-- Card 1: 20 for 12 Hours -->
+          <article class="blueprint-card" data-plan-id="plan-12h" data-price="20" data-duration="12 Hours" tabindex="0">
+            <div>
+              <div class="card-header-bar">
+                <span class="card-mono-tag">PASS // 12H</span>
+              </div>
+              <h3 class="card-duration-title">12 Hours</h3>
+              
+              <div class="card-price-block">
+                <span class="price-currency">KES</span>
+                <span class="price-integer">20</span>
+              </div>
+
+              <div class="card-specs-list">
+                <div class="spec-line"><span class="dot">&bull;</span> 10M / 10M Rate Limit</div>
+                <div class="spec-desc">Half Day Pass</div>
+              </div>
+            </div>
+
+            <button class="btn-card-action" data-select-plan="plan-12h">
+              <span>Select 20 KES</span>
+            </button>
+          </article>
+
+          <!-- Card 2: 30 for 24 Hours -->
+          <article class="blueprint-card" data-plan-id="plan-24h" data-price="30" data-duration="24 Hours" tabindex="0">
+            <div>
+              <div class="card-header-bar">
+                <span class="card-mono-tag">PASS // 24H</span>
+              </div>
+              <h3 class="card-duration-title">24 Hours</h3>
+
+              <div class="card-price-block">
+                <span class="price-currency">KES</span>
+                <span class="price-integer">30</span>
+              </div>
+
+              <div class="card-specs-list">
+                <div class="spec-line"><span class="dot">&bull;</span> 15M / 15M Rate Limit</div>
+                <div class="spec-desc">Full 1-Day Pass</div>
+              </div>
+            </div>
+
+            <button class="btn-card-action" data-select-plan="plan-24h">
+              <span>Select 30 KES</span>
+            </button>
+          </article>
+
+          <!-- Card 3: 50 for 2 Days -->
+          <article class="blueprint-card" data-plan-id="plan-2d" data-price="50" data-duration="2 Days" tabindex="0">
+            <div>
+              <div class="card-header-bar">
+                <span class="card-mono-tag">PASS // 48H</span>
+              </div>
+              <h3 class="card-duration-title">2 Days</h3>
+
+              <div class="card-price-block">
+                <span class="price-currency">KES</span>
+                <span class="price-integer">50</span>
+              </div>
+
+              <div class="card-specs-list">
+                <div class="spec-line"><span class="dot">&bull;</span> 20M / 20M Rate Limit</div>
+                <div class="spec-desc">48h Weekend Pass</div>
+              </div>
+            </div>
+
+            <button class="btn-card-action" data-select-plan="plan-2d">
+              <span>Select 50 KES</span>
+            </button>
+          </article>
+
+          <!-- Card 4: 100 for 5 Days -->
+          <article class="blueprint-card" data-plan-id="plan-5d" data-price="100" data-duration="5 Days" tabindex="0">
+            <div>
+              <div class="card-header-bar">
+                <span class="card-mono-tag">PASS // 120H</span>
+              </div>
+              <h3 class="card-duration-title">5 Days</h3>
+
+              <div class="card-price-block">
+                <span class="price-currency">KES</span>
+                <span class="price-integer">100</span>
+              </div>
+
+              <div class="card-specs-list">
+                <div class="spec-line"><span class="dot">&bull;</span> 25M / 25M Rate Limit</div>
+                <div class="spec-desc">Work-Week Saver</div>
+              </div>
+            </div>
+
+            <button class="btn-card-action" data-select-plan="plan-5d">
+              <span>Select 100 KES</span>
+            </button>
+          </article>
+
+          <!-- Card 5: 200 for 7 Days (Popular) -->
+          <article class="blueprint-card" data-plan-id="plan-7d" data-price="200" data-duration="7 Days" tabindex="0">
+            <div>
+              <div class="card-header-bar">
+                <span class="card-mono-tag">PASS // 168H</span>
+                <span class="card-annotation-badge">POPULAR</span>
+              </div>
+              <h3 class="card-duration-title">7 Days</h3>
+
+              <div class="card-price-block">
+                <span class="price-currency">KES</span>
+                <span class="price-integer">200</span>
+              </div>
+
+              <div class="card-specs-list">
+                <div class="spec-line"><span class="dot">&bull;</span> 30M / 30M Rate Limit</div>
+                <div class="spec-desc">Weekly Unlimited</div>
+              </div>
+            </div>
+
+            <button class="btn-card-action" data-select-plan="plan-7d">
+              <span>Select 200 KES</span>
+            </button>
+          </article>
+
+          <!-- Card 6: 700 for Monthly (Best Value) -->
+          <article class="blueprint-card" data-plan-id="plan-monthly" data-price="700" data-duration="30 Days" tabindex="0">
+            <div>
+              <div class="card-header-bar">
+                <span class="card-mono-tag">PASS // 720H</span>
+                <span class="card-annotation-badge">VALUE</span>
+              </div>
+              <h3 class="card-duration-title">Monthly</h3>
+
+              <div class="card-price-block">
+                <span class="price-currency">KES</span>
+                <span class="price-integer">700</span>
+              </div>
+
+              <div class="card-specs-list">
+                <div class="spec-line"><span class="dot">&bull;</span> 50M / 50M Rate Limit</div>
+                <div class="spec-desc">30-Day VIP Pass</div>
+              </div>
+            </div>
+
+            <button class="btn-card-action" data-select-plan="plan-monthly">
+              <span>Select 700 KES</span>
+            </button>
+          </article>
+
+        </section>
+
+        <!-- Quick Access Authentication Strip -->
+        <div class="quick-auth-card">
+          <div class="quick-auth-info">
+            <span class="quick-auth-dot"></span>
+            <span>Already have a Voucher PIN or Member Account?</span>
+          </div>
+          <div class="quick-auth-buttons">
+            <button type="button" class="btn-pill-outlined" id="btn-quick-voucher">Redeem Voucher PIN</button>
+            <button type="button" class="btn-pill-outlined btn-pill-ghost" id="btn-quick-login">Member Sign-In</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Blueprint Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-schematic-label">
+        <span class="node-dot"></span>
+        <span>AIRPULSE // ROUTEROS ENGINE &bull; REAL-TIME PAYMENT GATEWAY</span>
+      </div>
+      <div class="footer-links">
+        <button class="footer-btn-link" id="btn-footer-faq">Documentation &amp; FAQ</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Blueprint Payment Modal Dialog (Wireframe Style) -->
+  <div class="sheet-scrim" id="payment-scrim" aria-hidden="true">
+    <div class="sheet-container" id="payment-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-plan-title">
+      
+      <!-- Close Button -->
+      <button class="sheet-close-btn" id="btn-close-sheet" aria-label="Close modal">
+        &times;
+      </button>
+
+      <!-- Step 1: Input Form (STK Only) -->
+      <div class="sheet-step-view active" id="sheet-view-form">
+        <div class="modal-blueprint-header">
+          <span class="modal-chip">M-PESA EXPRESS // REAL-TIME STK PUSH</span>
+          <h2 class="sheet-title" id="sheet-plan-title">24 Hours Pass</h2>
+          <p class="sheet-desc">Enter your mobile number to receive the instant M-Pesa STK PIN prompt.</p>
+        </div>
+
+        <div class="modal-summary-box">
+          <div class="sum-col">
+            <span class="sum-label">DURATION</span>
+            <span class="sum-value" id="summary-duration">24 Hours</span>
+          </div>
+          <div class="sum-col" style="text-align:right;">
+            <span class="sum-label">AMOUNT</span>
+            <span class="sum-price" id="summary-price-amount">KES 30</span>
+          </div>
+        </div>
+
+        <form id="form-mpesa" onsubmit="return false;">
+          <div class="input-group">
+            <label for="mpesa-phone-input" class="input-label">Mobile Number (M-Pesa STK Prompt)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">+254</span>
+              <input type="tel" id="mpesa-phone-input" class="blueprint-input with-prefix" placeholder="712 345 678" pattern="[0-9]{9,10}" required autocomplete="tel">
+            </div>
+            <span class="input-helper">Enter Safaricom or Airtel number. You will receive an instant PIN prompt on your handset.</span>
+          </div>
+
+          <div class="device-bind-box">
+            <span class="bind-node">[ &bull; ]</span>
+            <span>Target MAC: <strong id="notice-mac">$(mac)</strong> &bull; Gateway: Real-Time API</span>
+          </div>
+
+          <button type="submit" class="btn-submit-blueprint" id="btn-submit-mpesa">
+            <span id="mpesa-btn-text">Pay with STK Push (KES 30)</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Step 2: Processing Radar Animation -->
+      <div class="sheet-step-view" id="sheet-view-processing">
+        <div class="processing-box">
+          <div class="wireframe-radar-node">
+            <span>[ M-PESA ]</span>
+          </div>
+          
+          <h3 class="processing-title" id="processing-status-title">M-Pesa STK Prompt Dispatched</h3>
+          <p class="processing-desc" id="processing-status-desc">A prompt has been sent to your phone. Please enter your PIN on your mobile screen to authorize.</p>
+          
+          <div class="blueprint-progress-track">
+            <div class="blueprint-progress-fill" id="payment-progress-bar"></div>
+          </div>
+
+          <div class="processing-steps-log">
+            <div class="step-log-item active" id="log-step-1">
+              <span class="step-node"></span>
+              <span>1. Real-time M-Pesa STK push initialized</span>
+            </div>
+            <div class="step-log-item" id="log-step-2">
+              <span class="step-node"></span>
+              <span>2. Awaiting mobile handset PIN authorization</span>
+            </div>
+            <div class="step-log-item" id="log-step-3">
+              <span class="step-node"></span>
+              <span>3. Payment approved &amp; MAC bound to RouterOS gateway</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Success Screen -->
+      <div class="sheet-step-view" id="sheet-view-success">
+        <div class="success-box">
+          <div class="success-check-mark">&check;</div>
+          <h3 class="success-title">PAYMENT APPROVED.</h3>
+          <p class="success-desc">M-Pesa payment approved via Real-Time Gateway. Your session is now live on the MikroTik network.</p>
+
+          <div class="receipt-card">
+            <div class="receipt-row">
+              <span>PAYMENT REF:</span>
+              <strong style="color:var(--color-paper); font-family:var(--font-geist-mono);" id="receipt-tuma-ref">NL82937401</strong>
+            </div>
+            <div class="receipt-row">
+              <span>PHONE:</span>
+              <strong style="color:var(--color-periwinkle-annotation); font-family:var(--font-geist-mono);" id="receipt-phone-display">+254 712 345 678</strong>
+            </div>
+            <div class="receipt-row">
+              <span>ALLOCATED PASS:</span>
+              <strong id="receipt-plan-name">24 Hours Pass</strong>
+            </div>
+            <div class="receipt-row">
+              <span>VOUCHER BACKUP PIN:</span>
+              <strong class="receipt-code-highlight" id="receipt-voucher-pin">AP-77824</strong>
+            </div>
+            <div class="receipt-row">
+              <span>TIME REMAINING:</span>
+              <strong style="color:var(--color-periwinkle-annotation);" id="receipt-timer">23:59:59</strong>
+            </div>
+          </div>
+
+          <button class="btn-submit-blueprint" id="btn-finish-and-browse">
+            <span>Start Browsing Internet &rarr;</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Voucher & Member Login Modal -->
+  <div class="sheet-scrim" id="login-modal-scrim" aria-hidden="true">
+    <div class="sheet-container" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+      <button class="sheet-close-btn" id="btn-close-login-modal" aria-label="Close modal">&times;</button>
+
+      <div class="modal-blueprint-header" style="text-align:center;">
+        <span class="modal-chip">GATEWAY ACCESS // SCHEMATIC</span>
+        <h2 class="sheet-title" id="login-modal-title">Authenticate</h2>
+        <p class="sheet-desc">Redeem a voucher PIN or sign in with credentials.</p>
+      </div>
+
+      <div class="blueprint-tab-bar" role="tablist">
+        <button class="tab-btn active" id="modal-tab-voucher-btn">Voucher PIN</button>
+        <button class="tab-btn" id="modal-tab-member-btn">Username &amp; Pass</button>
+      </div>
+
+      <!-- Voucher Form -->
+      <form class="login-tab-panel active" id="modal-voucher-form" onsubmit="return false;">
+        <div class="input-group">
+          <label for="direct-voucher-input" class="input-label">Enter Voucher PIN</label>
+          <input type="text" id="direct-voucher-input" class="blueprint-input" style="text-align:center;letter-spacing:0.1em;text-transform:uppercase;" placeholder="AP-XXXXXX" required autocomplete="off">
+        </div>
+        <button type="submit" class="btn-submit-blueprint" id="btn-submit-direct-voucher">
+          <span>Authorize Device</span>
+        </button>
+      </form>
+
+      <!-- Member Form -->
+      <form class="login-tab-panel" id="modal-member-form" onsubmit="return false;">
+        <div class="input-group">
+          <label for="member-username-input" class="input-label">Username</label>
+          <input type="text" id="member-username-input" class="blueprint-input" placeholder="Username" autocomplete="username">
+        </div>
+        <div class="input-group">
+          <label for="member-password-input" class="input-label">Password</label>
+          <input type="password" id="member-password-input" class="blueprint-input" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-submit-blueprint" id="btn-submit-member-login">
+          <span>Sign In to Hotspot</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FAQ Modal -->
+  <div class="sheet-scrim" id="faq-modal-scrim" aria-hidden="true">
+    <div class="sheet-container" id="faq-modal" role="dialog" aria-modal="true" aria-labelledby="faq-modal-title">
+      <button class="sheet-close-btn" id="btn-close-faq-modal" aria-label="Close FAQ modal">&times;</button>
+
+      <div class="modal-blueprint-header">
+        <span class="modal-chip">INDEX // TECHNICAL DOCS</span>
+        <h2 class="sheet-title" id="faq-modal-title">System FAQ</h2>
+        <p class="sheet-desc">Operational guidelines for AirPulse Hotspot gateway.</p>
+      </div>
+
+      <div class="faq-list-blueprint">
+        <div class="faq-schematic-item">
+          <strong>How does M-Pesa STK authentication function?</strong>
+          <p>Tap any price pass, submit your phone number, and authorization is sent as an automated SIM toolkit PIN prompt. Once authorized, the gateway marks your MAC address as authenticated.</p>
+        </div>
+        <div class="faq-schematic-item">
+          <strong>Does the session persist on Wi-Fi reconnect?</strong>
+          <p>Yes. The RouterOS radius profile retains your session time until expiration. Rejoining the network does not prompt for repayment.</p>
+        </div>
+        <div class="faq-schematic-item">
+          <strong>Device switching and voucher codes</strong>
+          <p>Each transaction produces an alphanumeric "AP-" voucher backup code. Use "Voucher Code" on any secondary machine to transfer session rights.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-Time MikroTik Connection & Diagnostics Modal -->
+  <div class="sheet-scrim" id="gateway-test-modal-scrim" aria-hidden="true">
+    <div class="sheet-container" id="gateway-test-modal" role="dialog" aria-modal="true" aria-labelledby="gateway-test-title">
+      <button class="sheet-close-btn" id="btn-close-gateway-test" aria-label="Close test modal">&times;</button>
+
+      <div class="modal-blueprint-header">
+        <span class="modal-chip">REAL-TIME TELEMETRY // MIKROTIK DIAGNOSTICS</span>
+        <h2 class="sheet-title" id="gateway-test-title">MikroTik Live Link</h2>
+        <p class="sheet-desc">Test real-time connection against physical MikroTik routers or customize the target gateway IP.</p>
+      </div>
+
+      <div class="modal-summary-box" style="margin-bottom:12px;">
+        <div class="sum-col">
+          <span class="sum-label">HOST ENVIRONMENT</span>
+          <span class="sum-value" id="gt-env-label" style="font-size:12px;">Detecting...</span>
+        </div>
+        <div class="sum-col" style="text-align:right;">
+          <span class="sum-label">GATEWAY LINK</span>
+          <span class="sum-price" id="gt-link-status" style="font-size:13px;color:var(--color-periwinkle-annotation);">PROBING</span>
+        </div>
+      </div>
+
+      <form id="form-gateway-test" onsubmit="return false;">
+        <div class="input-group">
+          <label for="gt-gateway-input" class="input-label">MikroTik Router Address / URL</label>
+          <input type="text" id="gt-gateway-input" class="blueprint-input" placeholder="192.168.88.1" value="192.168.88.1" autocomplete="off">
+          <span class="input-helper">Default RouterOS hotspot gateway is 192.168.88.1. Change if your router uses a different subnet (e.g. 10.0.0.1).</span>
+        </div>
+
+        <div class="input-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn-submit-blueprint" id="btn-run-ping-test" style="flex:1 1 140px;margin-top:0;">
+            <span>Probe Gateway Ping</span>
+          </button>
+          <button type="button" class="btn-card-action" id="btn-save-gateway-ip" style="flex:1 1 120px;padding:10px;">
+            <span>Save Target IP</span>
+          </button>
+        </div>
+
+        <div id="gt-results-box" class="code-terminal-box" style="display:none;margin-top:12px;background:#0d0d0d;border:1px dashed var(--color-graphite);padding:10px;font-family:var(--font-geist-mono);font-size:11px;color:var(--color-ash);line-height:1.5;">
+          <div id="gt-results-content">Awaiting test execution...</div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Connected State Bottom Dock Pill -->
+  <aside class="connected-dock-pill" id="active-session-dock" aria-live="polite">
+    <div class="dock-left">
+      <span class="active-pulse-dot"></span>
+      <div class="dock-info">
+        <span class="dock-title">AUTHENTICATED // 5GHZ LINK</span>
+        <span class="dock-timer" id="dock-timer-display">23:59:45 remaining</span>
+      </div>
+    </div>
+    <div class="dock-actions">
+      <button class="dock-btn-logout" id="btn-disconnect-session">Terminate</button>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       Self-Contained Embedded Scripts: MD5 Engine & Hotspot Portal Logic
+       ========================================================================= -->
+  <script>
+/* RFC 1321 MD5 Message-Digest Algorithm (MikroTik RouterOS Standard from hotspot8) */
+/*
+ * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
+ * Digest Algorithm, as defined in RFC 1321.
+ * Version 1.1 Copyright (C) Paul Johnston 1999 - 2002.
+ * Code also contributed by Greg Holt
+ * See http://pajhome.org.uk/site/legal.html for details.
+ */
+
+/*
+ * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+ * to work around bugs in some JS interpreters.
+ */
+function safe_add(x, y)
+{
+  var lsw = (x & 0xFFFF) + (y & 0xFFFF)
+  var msw = (x >> 16) + (y >> 16) + (lsw >> 16)
+  return (msw << 16) | (lsw & 0xFFFF)
+}
+
+/*
+ * Bitwise rotate a 32-bit number to the left.
+ */
+function rol(num, cnt)
+{
+  return (num << cnt) | (num >>> (32 - cnt))
+}
+
+/*
+ * These functions implement the four basic operations the algorithm uses.
+ */
+function cmn(q, a, b, x, s, t)
+{
+  return safe_add(rol(safe_add(safe_add(a, q), safe_add(x, t)), s), b)
+}
+function ff(a, b, c, d, x, s, t)
+{
+  return cmn((b & c) | ((~b) & d), a, b, x, s, t)
+}
+function gg(a, b, c, d, x, s, t)
+{
+  return cmn((b & d) | (c & (~d)), a, b, x, s, t)
+}
+function hh(a, b, c, d, x, s, t)
+{
+  return cmn(b ^ c ^ d, a, b, x, s, t)
+}
+function ii(a, b, c, d, x, s, t)
+{
+  return cmn(c ^ (b | (~d)), a, b, x, s, t)
+}
+
+/*
+ * Calculate the MD5 of an array of little-endian words, producing an array
+ * of little-endian words.
+ */
+function coreMD5(x)
+{
+  var a =  1732584193
+  var b = -271733879
+  var c = -1732584194
+  var d =  271733878
+
+  for(i = 0; i < x.length; i += 16)
+  {
+    var olda = a
+    var oldb = b
+    var oldc = c
+    var oldd = d
+
+    a = ff(a, b, c, d, x[i+ 0], 7 , -680876936)
+    d = ff(d, a, b, c, x[i+ 1], 12, -389564586)
+    c = ff(c, d, a, b, x[i+ 2], 17,  606105819)
+    b = ff(b, c, d, a, x[i+ 3], 22, -1044525330)
+    a = ff(a, b, c, d, x[i+ 4], 7 , -176418897)
+    d = ff(d, a, b, c, x[i+ 5], 12,  1200080426)
+    c = ff(c, d, a, b, x[i+ 6], 17, -1473231341)
+    b = ff(b, c, d, a, x[i+ 7], 22, -45705983)
+    a = ff(a, b, c, d, x[i+ 8], 7 ,  1770035416)
+    d = ff(d, a, b, c, x[i+ 9], 12, -1958414417)
+    c = ff(c, d, a, b, x[i+10], 17, -42063)
+    b = ff(b, c, d, a, x[i+11], 22, -1990404162)
+    a = ff(a, b, c, d, x[i+12], 7 ,  1804603682)
+    d = ff(d, a, b, c, x[i+13], 12, -40341101)
+    c = ff(c, d, a, b, x[i+14], 17, -1502002290)
+    b = ff(b, c, d, a, x[i+15], 22,  1236535329)
+
+    a = gg(a, b, c, d, x[i+ 1], 5 , -165796510)
+    d = gg(d, a, b, c, x[i+ 6], 9 , -1069501632)
+    c = gg(c, d, a, b, x[i+11], 14,  643717713)
+    b = gg(b, c, d, a, x[i+ 0], 20, -373897302)
+    a = gg(a, b, c, d, x[i+ 5], 5 , -701558691)
+    d = gg(d, a, b, c, x[i+10], 9 ,  38016083)
+    c = gg(c, d, a, b, x[i+15], 14, -660478335)
+    b = gg(b, c, d, a, x[i+ 4], 20, -405537848)
+    a = gg(a, b, c, d, x[i+ 9], 5 ,  568446438)
+    d = gg(d, a, b, c, x[i+14], 9 , -1019803690)
+    c = gg(c, d, a, b, x[i+ 3], 14, -187363961)
+    b = gg(b, c, d, a, x[i+ 8], 20,  1163531501)
+    a = gg(a, b, c, d, x[i+13], 5 , -1444681467)
+    d = gg(d, a, b, c, x[i+ 2], 9 , -51403784)
+    c = gg(c, d, a, b, x[i+ 7], 14,  1735328473)
+    b = gg(b, c, d, a, x[i+12], 20, -1926607734)
+
+    a = hh(a, b, c, d, x[i+ 5], 4 , -378558)
+    d = hh(d, a, b, c, x[i+ 8], 11, -2022574463)
+    c = hh(c, d, a, b, x[i+11], 16,  1839030562)
+    b = hh(b, c, d, a, x[i+14], 23, -35309556)
+    a = hh(a, b, c, d, x[i+ 1], 4 , -1530992060)
+    d = hh(d, a, b, c, x[i+ 4], 11,  1272893353)
+    c = hh(c, d, a, b, x[i+ 7], 16, -155497632)
+    b = hh(b, c, d, a, x[i+10], 23, -1094730640)
+    a = hh(a, b, c, d, x[i+13], 4 ,  681279174)
+    d = hh(d, a, b, c, x[i+ 0], 11, -358537222)
+    c = hh(c, d, a, b, x[i+ 3], 16, -722521979)
+    b = hh(b, c, d, a, x[i+ 6], 23,  76029189)
+    a = hh(a, b, c, d, x[i+ 9], 4 , -640364487)
+    d = hh(d, a, b, c, x[i+12], 11, -421815835)
+    c = hh(c, d, a, b, x[i+15], 16,  530742520)
+    b = hh(b, c, d, a, x[i+ 2], 23, -995338651)
+
+    a = ii(a, b, c, d, x[i+ 0], 6 , -198630844)
+    d = ii(d, a, b, c, x[i+ 7], 10,  1126891415)
+    c = ii(c, d, a, b, x[i+14], 15, -1416354905)
+    b = ii(b, c, d, a, x[i+ 5], 21, -57434055)
+    a = ii(a, b, c, d, x[i+12], 6 ,  1700485571)
+    d = ii(d, a, b, c, x[i+ 3], 10, -1894986606)
+    c = ii(c, d, a, b, x[i+10], 15, -1051523)
+    b = ii(b, c, d, a, x[i+ 1], 21, -2054922799)
+    a = ii(a, b, c, d, x[i+ 8], 6 ,  1873313359)
+    d = ii(d, a, b, c, x[i+15], 10, -30611744)
+    c = ii(c, d, a, b, x[i+ 6], 15, -1560198380)
+    b = ii(b, c, d, a, x[i+13], 21,  1309151649)
+    a = ii(a, b, c, d, x[i+ 4], 6 , -145523070)
+    d = ii(d, a, b, c, x[i+11], 10, -1120210379)
+    c = ii(c, d, a, b, x[i+ 2], 15,  718787259)
+    b = ii(b, c, d, a, x[i+ 9], 21, -343485551)
+
+    a = safe_add(a, olda)
+    b = safe_add(b, oldb)
+    c = safe_add(c, oldc)
+    d = safe_add(d, oldd)
+  }
+  return [a, b, c, d]
+}
+
+/*
+ * Convert an array of little-endian words to a hex string.
+ */
+function binl2hex(binarray)
+{
+  var hex_tab = "0123456789abcdef"
+  var str = ""
+  for(var i = 0; i < binarray.length * 4; i++)
+  {
+    str += hex_tab.charAt((binarray[i>>2] >> ((i%4)*8+4)) & 0xF) +
+           hex_tab.charAt((binarray[i>>2] >> ((i%4)*8)) & 0xF)
+  }
+  return str
+}
+
+/*
+ * Convert an array of little-endian words to a base64 encoded string.
+ */
+function binl2b64(binarray)
+{
+  var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+  var str = ""
+  for(var i = 0; i < binarray.length * 32; i += 6)
+  {
+    str += tab.charAt(((binarray[i>>5] << (i%32)) & 0x3F) |
+                      ((binarray[i>>5+1] >> (32-i%32)) & 0x3F))
+  }
+  return str
+}
+
+/*
+ * Convert an 8-bit character string to a sequence of 16-word blocks, stored
+ * as an array, and append appropriate padding for MD4/5 calculation.
+ * If any of the characters are >255, the high byte is silently ignored.
+ */
+function str2binl(str)
+{
+  var nblk = ((str.length + 8) >> 6) + 1 // number of 16-word blocks
+  var blks = new Array(nblk * 16)
+  for(var i = 0; i < nblk * 16; i++) blks[i] = 0
+  for(var i = 0; i < str.length; i++)
+    blks[i>>2] |= (str.charCodeAt(i) & 0xFF) << ((i%4) * 8)
+  blks[i>>2] |= 0x80 << ((i%4) * 8)
+  blks[nblk*16-2] = str.length * 8
+  return blks
+}
+
+/*
+ * Convert a wide-character string to a sequence of 16-word blocks, stored as
+ * an array, and append appropriate padding for MD4/5 calculation.
+ */
+function strw2binl(str)
+{
+  var nblk = ((str.length + 4) >> 5) + 1 // number of 16-word blocks
+  var blks = new Array(nblk * 16)
+  for(var i = 0; i < nblk * 16; i++) blks[i] = 0
+  for(var i = 0; i < str.length; i++)
+    blks[i>>1] |= str.charCodeAt(i) << ((i%2) * 16)
+  blks[i>>1] |= 0x80 << ((i%2) * 16)
+  blks[nblk*16-2] = str.length * 16
+  return blks
+}
+
+/*
+ * External interface
+ */
+function hexMD5 (str) { return binl2hex(coreMD5( str2binl(str))) }
+function hexMD5w(str) { return binl2hex(coreMD5(strw2binl(str))) }
+function b64MD5 (str) { return binl2b64(coreMD5( str2binl(str))) }
+function b64MD5w(str) { return binl2b64(coreMD5(strw2binl(str))) }
+/* Backward compatibility */
+function calcMD5(str) { return binl2hex(coreMD5( str2binl(str))) }
+
+
+/* Hotspot Portal Engine & Live MikroTik Auth Controller */
+/**
+ * AirPulse MikroTik Hotspot — Single Page M-Pesa Engine
+ * Exclusively M-Pesa STK Push payments, automated MikroTik session login,
+ * live timer tracking, and voucher redemption.
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // ------------------------------------------------------------------------
+  // 1. Audio-Haptic Feedback Engine
+  // ------------------------------------------------------------------------
+  let audioContext = null;
+
+  function initAudio() {
+    if (!audioContext) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) audioContext = new AudioCtx();
+    }
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  }
+
+  function playClickSound() {
+    try {
+      initAudio();
+      if (!audioContext) return;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, audioContext.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.035);
+      gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.035);
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      osc.start();
+      osc.stop(audioContext.currentTime + 0.035);
+    } catch (e) {}
+  }
+
+  function playSuccessChime() {
+    try {
+      initAudio();
+      if (!audioContext) return;
+      const now = audioContext.currentTime;
+
+      // Note 1 (E6)
+      const osc1 = audioContext.createOscillator();
+      const gain1 = audioContext.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(1318.51, now);
+      gain1.gain.setValueAtTime(0.12, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc1.connect(gain1);
+      gain1.connect(audioContext.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.25);
+
+      // Note 2 (B6)
+      const osc2 = audioContext.createOscillator();
+      const gain2 = audioContext.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1975.53, now + 0.1);
+      gain2.gain.setValueAtTime(0.14, now + 0.1);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc2.connect(gain2);
+      gain2.connect(audioContext.destination);
+      osc2.start(now + 0.1);
+      osc2.stop(now + 0.5);
+    } catch (e) {}
+  }
+
+  function triggerHaptic(duration = 10) {
+    if (navigator.vibrate) {
+      try { navigator.vibrate(duration); } catch (e) {}
+    }
+  }
+
+  // Pointerdown feedback on interactive elements
+  document.querySelectorAll('button, .blueprint-card, .btn-plan-card, .btn-pill-outlined').forEach(el => {
+    el.addEventListener('pointerdown', () => {
+      playClickSound();
+      triggerHaptic(8);
+    }, { passive: true });
+  });
+
+  // ------------------------------------------------------------------------
+  // 2. 7 Hotspot Price Plans Configuration (Includes 10 for 3 Hours Starter)
+  // ------------------------------------------------------------------------
+  const pricingPlans = {
+    'plan-3h': {
+      id: 'plan-3h',
+      title: '3 Hours Pass',
+      price: 10,
+      duration: '3 Hours',
+      durationSeconds: 3 * 3600,
+      speed: '5 Mbps'
+    },
+    'plan-12h': {
+      id: 'plan-12h',
+      title: '12 Hours Pass',
+      price: 20,
+      duration: '12 Hours',
+      durationSeconds: 12 * 3600,
+      speed: '10 Mbps'
+    },
+    'plan-24h': {
+      id: 'plan-24h',
+      title: '24 Hours Pass',
+      price: 30,
+      duration: '24 Hours (1 Day)',
+      durationSeconds: 24 * 3600,
+      speed: '15 Mbps'
+    },
+    'plan-2d': {
+      id: 'plan-2d',
+      title: '2 Days Pass',
+      price: 50,
+      duration: '2 Days (48 Hours)',
+      durationSeconds: 48 * 3600,
+      speed: '20 Mbps'
+    },
+    'plan-5d': {
+      id: 'plan-5d',
+      title: '5 Days Pass',
+      price: 100,
+      duration: '5 Days (120 Hours)',
+      durationSeconds: 5 * 24 * 3600,
+      speed: '25 Mbps'
+    },
+    'plan-7d': {
+      id: 'plan-7d',
+      title: '7 Days Pro Pass',
+      price: 200,
+      duration: '7 Days (1 Week)',
+      durationSeconds: 7 * 24 * 3600,
+      speed: '30 Mbps'
+    },
+    'plan-monthly': {
+      id: 'plan-monthly',
+      title: 'Monthly Unlimited',
+      price: 700,
+      duration: '30 Days (Monthly)',
+      durationSeconds: 30 * 24 * 3600,
+      speed: '50 Mbps'
+    }
+  };
+
+  // ------------------------------------------------------------------------
+  // 3. M-Pesa Payment Sheet Management
+  // ------------------------------------------------------------------------
+  const paymentScrim = document.getElementById('payment-scrim');
+  const btnCloseSheet = document.getElementById('btn-close-sheet');
+
+  const sheetPlanTitle = document.getElementById('sheet-plan-title');
+  const summaryDuration = document.getElementById('summary-duration');
+  const summaryPriceAmount = document.getElementById('summary-price-amount');
+  const mpesaBtnText = document.getElementById('mpesa-btn-text');
+
+  const viewForm = document.getElementById('sheet-view-form');
+  const viewProcessing = document.getElementById('sheet-view-processing');
+  const viewSuccess = document.getElementById('sheet-view-success');
+
+  const progressBar = document.getElementById('payment-progress-bar');
+  const logStep1 = document.getElementById('log-step-1');
+  const logStep2 = document.getElementById('log-step-2');
+  const logStep3 = document.getElementById('log-step-3');
+
+  const receiptPlanName = document.getElementById('receipt-plan-name');
+  const receiptVoucherPin = document.getElementById('receipt-voucher-pin');
+  const receiptTimer = document.getElementById('receipt-timer');
+  const btnFinishAndBrowse = document.getElementById('btn-finish-and-browse');
+  const formMpesa = document.getElementById('form-mpesa');
+
+  let currentSelectedPlan = pricingPlans['plan-3h'];
+  let sessionTimerInterval = null;
+  let remainingSessionSeconds = 0;
+
+  function showSheetStep(step) {
+    viewForm.classList.remove('active');
+    viewProcessing.classList.remove('active');
+    viewSuccess.classList.remove('active');
+
+    if (step === 'form') viewForm.classList.add('active');
+    if (step === 'processing') viewProcessing.classList.add('active');
+    if (step === 'success') viewSuccess.classList.add('active');
+  }
+
+  // ------------------------------------------------------------------------
+  // 4. Real-Time Payment API & Gateway Configuration
+  // ------------------------------------------------------------------------
+  const PAYMENT_CONFIG_KEY = 'airpulse_payment_config';
+  const TUMA_CONFIG_KEY = PAYMENT_CONFIG_KEY;
+  const DB_STORAGE_KEY = 'airpulse_payment_records';
+  const CLIENTS_STORAGE_KEY = 'airpulse_client_devices';
+
+  function getTumaConfig() {
+    try {
+      const saved = localStorage.getItem(PAYMENT_CONFIG_KEY) || localStorage.getItem('airpulse_tuma_config');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      apiKey: 'live_daraja_key_849204',
+      shortcode: '174379',
+      bankName: 'Equity Bank Kenya',
+      accountNumber: '0180293847291',
+      accountName: 'AirPulse Hotspot Networks',
+      endpoint: '/api/payments'
+    };
+  }
+
+  function saveTumaConfig(cfg) {
+    try {
+      localStorage.setItem(PAYMENT_CONFIG_KEY, JSON.stringify(cfg));
+    } catch (e) {}
+  }
+
+  let tumaConfig = getTumaConfig();
+
+  // Populate config UI elements
+  const tumaApiKeyInput = document.getElementById('tuma-api-key');
+  const cfgOperatorBank = document.getElementById('cfg-operator-bank');
+  const cfgOperatorAccount = document.getElementById('cfg-operator-account');
+  const displayOperatorBankName = document.getElementById('operator-bank-name');
+  const displayOperatorAccountNum = document.getElementById('operator-account-num');
+  const displayOperatorAccountName = document.getElementById('operator-account-name');
+
+  function updateTumaUIFromConfig() {
+    if (displayOperatorBankName) displayOperatorBankName.textContent = tumaConfig.bankName;
+    if (displayOperatorAccountNum) displayOperatorAccountNum.textContent = tumaConfig.accountNumber;
+    if (displayOperatorAccountName) displayOperatorAccountName.textContent = tumaConfig.accountName;
+    if (tumaApiKeyInput) tumaApiKeyInput.value = tumaConfig.apiKey;
+    if (cfgOperatorBank) cfgOperatorBank.value = tumaConfig.bankName;
+    if (cfgOperatorAccount) cfgOperatorAccount.value = tumaConfig.accountNumber;
+  }
+
+  updateTumaUIFromConfig();
+
+  // Save config on changes
+  [tumaApiKeyInput, cfgOperatorBank, cfgOperatorAccount].forEach(el => {
+    if (el) {
+      el.addEventListener('change', () => {
+        tumaConfig.apiKey = tumaApiKeyInput ? tumaApiKeyInput.value.trim() : tumaConfig.apiKey;
+        tumaConfig.bankName = cfgOperatorBank ? cfgOperatorBank.value.trim() : tumaConfig.bankName;
+        tumaConfig.accountNumber = cfgOperatorAccount ? cfgOperatorAccount.value.trim() : tumaConfig.accountNumber;
+        saveTumaConfig(tumaConfig);
+        updateTumaUIFromConfig();
+      });
+    }
+  });
+
+  function openPaymentSheet(planId) {
+    const plan = pricingPlans[planId] || pricingPlans['plan-3h'] || pricingPlans['plan-12h'];
+    currentSelectedPlan = plan;
+
+    sheetPlanTitle.textContent = plan.title;
+    summaryDuration.textContent = plan.duration;
+    summaryPriceAmount.textContent = `KES ${plan.price}`;
+    if (mpesaBtnText) mpesaBtnText.textContent = `Pay with STK Push (KES ${plan.price})`;
+
+    showSheetStep('form');
+    paymentScrim.classList.add('active');
+    paymentScrim.setAttribute('aria-hidden', 'false');
+
+    setTimeout(() => {
+      const phoneInput = document.getElementById('mpesa-phone-input');
+      if (phoneInput) phoneInput.focus();
+    }, 150);
+  }
+
+  function closePaymentSheet() {
+    paymentScrim.classList.remove('active');
+    paymentScrim.setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnCloseSheet) {
+    btnCloseSheet.addEventListener('click', closePaymentSheet);
+  }
+
+  paymentScrim.addEventListener('click', (e) => {
+    if (e.target === paymentScrim) closePaymentSheet();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closePaymentSheet();
+      closeLoginModal();
+      closeFaqModal();
+    }
+  });
+
+  // Attach click listener to each of the 6 Button Cards
+  document.querySelectorAll('.blueprint-card, .btn-plan-card').forEach(card => {
+    const planId = card.getAttribute('data-plan-id');
+
+    card.addEventListener('click', () => {
+      openPaymentSheet(planId);
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openPaymentSheet(planId);
+      }
+    });
+  });
+
+  // Also support direct inner button clicks
+  document.querySelectorAll('[data-select-plan]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const planId = btn.getAttribute('data-select-plan');
+      openPaymentSheet(planId);
+    });
+  });
+
+  // ------------------------------------------------------------------------
+  // 5. Real-Time M-Pesa STK Push & Payment Execution Engine
+  // ------------------------------------------------------------------------
+  const receiptTumaRef = document.getElementById('receipt-tuma-ref') || document.getElementById('receipt-payment-ref');
+  const receiptPhoneDisplay = document.getElementById('receipt-phone-display');
+
+  if (formMpesa) {
+    formMpesa.addEventListener('submit', (e) => {
+      e.preventDefault();
+      executePaymentFlow();
+    });
+  }
+
+  async function pollPaymentStatus(paymentRef, checkoutId, timeoutMs = 90000) {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      try {
+        const q = new URLSearchParams();
+        if (paymentRef) q.set('ref', paymentRef);
+        if (checkoutId) q.set('checkoutId', checkoutId);
+        const res = await fetch('/api/payments/status?' + q.toString(), { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'Completed') return { ok: true, data };
+          if (data.status === 'Failed') return { ok: false, data, error: data.record?.error || 'Payment failed or was cancelled.' };
+        }
+      } catch (e) {}
+      await new Promise(r => setTimeout(r, 3000));
+    }
+    return { ok: false, error: 'Payment confirmation timed out. If you completed PIN entry, retry voucher/login after confirmation.' };
+  }
+
+  async function executePaymentFlow() {
+    const phoneInput = document.getElementById('mpesa-phone-input');
+    const rawPhone = phoneInput ? phoneInput.value.trim().replace(/^0/, '') : '';
+
+    if (!rawPhone || rawPhone.length < 9) {
+      alert('Please enter a valid mobile number (e.g. 712 345 678) to receive the M-Pesa STK prompt.');
+      return;
+    }
+
+    const fullPhone = '+254 ' + rawPhone;
+    const clientMac = navMacDisplay ? navMacDisplay.textContent.trim() : '4A:2B:8C:91:DE:3F';
+    const clientIp = navIpDisplay ? navIpDisplay.textContent.trim() : '192.168.88.145';
+    const storedGateway = localStorage.getItem('airpulse_target_gateway') || '192.168.88.1';
+
+    showSheetStep('processing');
+    progressBar.style.width = '20%';
+    logStep1.className = 'step-log-item active';
+    logStep2.className = 'step-log-item';
+    logStep3.className = 'step-log-item';
+    const procTitle = document.getElementById('processing-status-title');
+    const procDesc = document.getElementById('processing-status-desc');
+    if (procTitle) procTitle.textContent = 'Dispatching Tuma STK Push';
+    if (procDesc) procDesc.textContent = 'Sending secure M-Pesa STK prompt via Tuma gateway to your phone.';
+
+    let paymentData = null;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch('/api/payments/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: rawPhone,
+          planId: currentSelectedPlan.id,
+          amount: currentSelectedPlan.price,
+          mac: clientMac,
+          ip: clientIp,
+          gatewayHost: storedGateway
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      paymentData = await res.json().catch(() => null);
+      if (!res.ok || !paymentData?.success) {
+        throw new Error(paymentData?.error || `Payment initiation failed (HTTP ${res.status})`);
+      }
+    } catch (err) {
+      showSheetStep('form');
+      alert(err.name === 'AbortError' ? 'Payment gateway timed out. Check server connection and try again.' : (err.message || 'Payment initiation failed.'));
+      return;
+    }
+
+    progressBar.style.width = '55%';
+    logStep1.className = 'step-log-item completed';
+    logStep2.className = 'step-log-item active';
+    if (procTitle) procTitle.textContent = 'Awaiting M-Pesa PIN Confirmation';
+    if (procDesc) procDesc.textContent = `STK prompt sent to ${fullPhone}. Enter your M-Pesa PIN to complete payment to bank settlement.`;
+    triggerHaptic(15);
+
+    let finalStatus = paymentData;
+    if (String(paymentData.status).toUpperCase() === 'PENDING') {
+      const polled = await pollPaymentStatus(paymentData.paymentRef, paymentData.checkoutId);
+      if (!polled.ok) {
+        showSheetStep('form');
+        alert(polled.error || 'Payment was not confirmed.');
+        return;
+      }
+      finalStatus = { ...paymentData, ...polled.data, status: 'Completed' };
+    }
+
+    progressBar.style.width = '100%';
+    logStep2.className = 'step-log-item completed';
+    logStep3.className = 'step-log-item completed';
+
+    const paymentMeta = {
+      name: 'M-Pesa Client (' + rawPhone + ')',
+      phone: fullPhone,
+      bank: finalStatus.bank || tumaConfig.bankName,
+      account: finalStatus.account || tumaConfig.accountNumber,
+      channel: 'Tuma STK Push',
+      voucherPin: finalStatus.voucherPin || paymentData.voucherPin
+    };
+
+    finalizeHotspotLogin(finalStatus.paymentRef || paymentData.paymentRef, paymentMeta);
+  }
+
+  // Alias for backward compatibility
+  function executeTumaPaymentFlow() {
+    executePaymentFlow();
+  }
+
+  function generateVoucherPin() {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let code = 'AP-';
+    for (let i = 0; i < 5; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  function finalizeHotspotLogin(tumaRef, meta = {}) {
+    const voucherPin = meta.voucherPin || generateVoucherPin();
+    const clientMac = navMacDisplay ? navMacDisplay.textContent.trim() : '4A:2B:8C:91:DE:3F';
+    const clientIp = navIpDisplay ? navIpDisplay.textContent.trim() : '192.168.88.145';
+    const storedGateway = localStorage.getItem('airpulse_target_gateway') || '192.168.88.1';
+
+    receiptPlanName.textContent = currentSelectedPlan.title;
+    receiptVoucherPin.textContent = voucherPin;
+
+    if (receiptTumaRef) {
+      receiptTumaRef.textContent = tumaRef;
+    }
+
+    if (receiptPhoneDisplay) {
+      receiptPhoneDisplay.textContent = meta.phone || '+254 712 345 678';
+    }
+
+    remainingSessionSeconds = currentSelectedPlan.durationSeconds;
+    updateReceiptTimerDisplay();
+
+    // 1. Device authorization is handled by backend payment flow; only attempt direct connect for manual/voucher flows
+    if (String(tumaRef).startsWith('VOUCHER-') || String(tumaRef).startsWith('MEMBER-')) {
+      fetch('/api/devices/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mac: clientMac, ip: clientIp, planTitle: currentSelectedPlan.title,
+          durationSeconds: currentSelectedPlan.durationSeconds, voucherPin,
+          gatewayHost: storedGateway, phone: meta.phone || 'Direct Connect', paymentRef: tumaRef
+        })
+      }).catch(() => {});
+    }
+
+    // 2. Persist Transaction in airpulse_payment_records for Database & Dashboard
+    try {
+      let records = [];
+      const stored = localStorage.getItem(DB_STORAGE_KEY);
+      if (stored) records = JSON.parse(stored);
+      
+      const newRecord = {
+        id: tumaRef,
+        name: meta.name || 'AirPulse Client',
+        phone: meta.phone || '+254712345678',
+        amount: currentSelectedPlan.price,
+        bank: meta.bank || tumaConfig.bankName,
+        account: tumaConfig.accountNumber,
+        channel: meta.channel || 'M-Pesa STK Push',
+        mac: clientMac,
+        ip: clientIp,
+        plan: `${currentSelectedPlan.title} — KES ${currentSelectedPlan.price}`,
+        status: 'Completed',
+        date: new Date().toISOString(),
+        voucherPin: voucherPin
+      };
+
+      records.unshift(newRecord);
+      localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(records));
+    } catch (e) {
+      console.warn('Failed to persist payment record:', e);
+    }
+
+    // 3. Persist Client Lease in airpulse_client_devices for Device Manager
+    try {
+      let clientDevices = [];
+      const storedClients = localStorage.getItem(CLIENTS_STORAGE_KEY);
+      if (storedClients) clientDevices = JSON.parse(storedClients);
+
+      clientDevices = clientDevices.filter(c => c.mac !== clientMac);
+      clientDevices.unshift({
+        mac: clientMac,
+        ip: clientIp,
+        name: meta.name || 'Client Device',
+        hostname: 'Device-' + clientMac.slice(-5).replace(':', ''),
+        plan: currentSelectedPlan.title,
+        durationSeconds: currentSelectedPlan.durationSeconds,
+        startTime: Date.now(),
+        expiresAt: Date.now() + (currentSelectedPlan.durationSeconds * 1000),
+        gateway: storedGateway,
+        status: 'active',
+        dataUsedMb: (Math.random() * 15 + 4).toFixed(1),
+        paymentRef: tumaRef,
+        voucherPin: voucherPin
+      });
+
+      localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clientDevices));
+    } catch (e) {
+      console.warn('Failed to persist client device:', e);
+    }
+
+    playSuccessChime();
+    triggerHaptic([20, 80, 40]);
+
+    showSheetStep('success');
+
+    // Show persistent bottom connected dock
+    showConnectedDock();
+
+    // Start countdown timer
+    startSessionTimer();
+
+    // Fill hidden MikroTik RouterOS form
+    const mtUsername = document.getElementById('mt-username');
+    const mtPassword = document.getElementById('mt-password');
+    if (mtUsername && mtPassword) {
+      mtUsername.value = voucherPin;
+      mtPassword.value = voucherPin;
+    }
+  }
+
+  function formatSeconds(totalSec) {
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function updateReceiptTimerDisplay() {
+    if (receiptTimer) receiptTimer.textContent = formatSeconds(remainingSessionSeconds);
+    const dockTimer = document.getElementById('dock-timer-display');
+    if (dockTimer) dockTimer.textContent = `${formatSeconds(remainingSessionSeconds)} remaining`;
+  }
+
+  function startSessionTimer() {
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+
+    sessionTimerInterval = setInterval(() => {
+      if (remainingSessionSeconds > 0) {
+        remainingSessionSeconds--;
+        updateReceiptTimerDisplay();
+      } else {
+        clearInterval(sessionTimerInterval);
+        disconnectSession();
+      }
+    }, 1000);
+  }
+
+  function showConnectedDock() {
+    const dock = document.getElementById('active-session-dock');
+    if (dock) dock.classList.add('visible');
+  }
+
+  function hideConnectedDock() {
+    const dock = document.getElementById('active-session-dock');
+    if (dock) dock.classList.remove('visible');
+  }
+
+  function disconnectSession() {
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+    hideConnectedDock();
+    triggerHaptic(20);
+  }
+
+  const btnDisconnectSession = document.getElementById('btn-disconnect-session');
+  if (btnDisconnectSession) {
+    btnDisconnectSession.addEventListener('click', disconnectSession);
+  }
+
+  function isMikrotikAction(action) {
+    return !!(action && action.indexOf('$(') === -1 && action.trim());
+  }
+
+  function submitMikrotikLogin(username, password) {
+    const user = (username || '').trim();
+    const pass = (password !== undefined && password !== null) ? password : user;
+    if (!user) return false;
+
+    // 1. Live MikroTik with HTTP-CHAP (active when $(if chap-id) is processed by RouterOS)
+    if (typeof doChapLogin === 'function') {
+      try {
+        return doChapLogin(user, pass);
+      } catch (err) {
+        console.warn('CHAP auth error, falling back to direct post:', err);
+      }
+    }
+
+    // 2. Live MikroTik with HTTP-PAP (direct POST via form name="login" or "sendin")
+    const form = document.login || document.getElementById('mikrotik-login-form');
+    if (form) {
+      const mtUsername = document.getElementById('mt-username') || form.username;
+      const mtPassword = document.getElementById('mt-password') || form.password;
+      if (mtUsername) mtUsername.value = user;
+      if (mtPassword) mtPassword.value = pass;
+
+      let action = form.getAttribute('action') || '';
+      if (isMikrotikAction(action)) {
+        form.submit();
+        return true;
+      }
+
+      // Stored target gateway override from Diagnostics modal
+      const storedGateway = localStorage.getItem('airpulse_target_gateway');
+      if (storedGateway) {
+        const cleanGw = storedGateway.replace(/^https?:\/\//, '').replace(/\/login.*$/, '').replace(/\/+$/, '');
+        form.setAttribute('action', 'http://' + cleanGw + '/login');
+        form.submit();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  if (btnFinishAndBrowse) {
+    btnFinishAndBrowse.addEventListener('click', () => {
+      const pin = receiptVoucherPin ? receiptVoucherPin.textContent.trim() : '';
+      closePaymentSheet();
+      if (pin) submitMikrotikLogin(pin, pin);
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 5. Voucher & Member Login Modal
+  // ------------------------------------------------------------------------
+  const loginModalScrim = document.getElementById('login-modal-scrim');
+  const btnCloseLoginModal = document.getElementById('btn-close-login-modal');
+  const btnOpenVoucher = document.getElementById('btn-open-voucher');
+  const btnNavLogin = document.getElementById('btn-nav-login');
+
+  const modalTabVoucherBtn = document.getElementById('modal-tab-voucher-btn');
+  const modalTabMemberBtn = document.getElementById('modal-tab-member-btn');
+  const modalVoucherForm = document.getElementById('modal-voucher-form');
+  const modalMemberForm = document.getElementById('modal-member-form');
+
+  function openLoginModal(tab = 'voucher') {
+    loginModalScrim.classList.add('active');
+    loginModalScrim.setAttribute('aria-hidden', 'false');
+    switchLoginModalTab(tab);
+
+    setTimeout(() => {
+      const voucherInput = document.getElementById('direct-voucher-input');
+      if (voucherInput && tab === 'voucher') voucherInput.focus();
+    }, 150);
+  }
+
+  function closeLoginModal() {
+    loginModalScrim.classList.remove('active');
+    loginModalScrim.setAttribute('aria-hidden', 'true');
+  }
+
+  function switchLoginModalTab(tab) {
+    if (tab === 'voucher') {
+      modalTabVoucherBtn.classList.add('active');
+      modalTabMemberBtn.classList.remove('active');
+      modalVoucherForm.classList.add('active');
+      modalMemberForm.classList.remove('active');
+    } else {
+      modalTabMemberBtn.classList.add('active');
+      modalTabVoucherBtn.classList.remove('active');
+      modalMemberForm.classList.add('active');
+      modalVoucherForm.classList.remove('active');
+    }
+  }
+
+  if (btnOpenVoucher) btnOpenVoucher.addEventListener('click', () => openLoginModal('voucher'));
+  if (btnNavLogin) btnNavLogin.addEventListener('click', () => openLoginModal('member'));
+  if (btnCloseLoginModal) btnCloseLoginModal.addEventListener('click', closeLoginModal);
+  if (modalTabVoucherBtn) modalTabVoucherBtn.addEventListener('click', () => switchLoginModalTab('voucher'));
+  if (modalTabMemberBtn) modalTabMemberBtn.addEventListener('click', () => switchLoginModalTab('member'));
+
+  loginModalScrim.addEventListener('click', (e) => {
+    if (e.target === loginModalScrim) closeLoginModal();
+  });
+
+  if (modalVoucherForm) {
+    modalVoucherForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const voucherInput = document.getElementById('direct-voucher-input');
+      const pin = voucherInput && voucherInput.value.trim() ? voucherInput.value.trim().toUpperCase() : '';
+      if (!pin) return;
+      closeLoginModal();
+      if (submitMikrotikLogin(pin, pin)) return;
+      currentSelectedPlan = pricingPlans['plan-24h'];
+      finalizeHotspotLogin('VOUCHER-' + pin, {
+        name: 'Voucher User (' + pin + ')',
+        phone: 'Voucher Access',
+        channel: 'Voucher PIN Redemption'
+      });
+    });
+  }
+
+  if (modalMemberForm) {
+    modalMemberForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const memberInput = document.getElementById('member-username-input');
+      const memberPass = document.getElementById('member-password-input');
+      const username = memberInput && memberInput.value.trim() ? memberInput.value.trim() : '';
+      const password = memberPass ? memberPass.value : '';
+      if (!username || !password) return;
+      closeLoginModal();
+      if (submitMikrotikLogin(username, password)) return;
+      currentSelectedPlan = pricingPlans['plan-monthly'];
+      finalizeHotspotLogin('MEMBER-' + Date.now().toString(36).toUpperCase(), {
+        name: username + ' (Member)',
+        phone: 'Member Credential',
+        channel: 'Member Login'
+      });
+    });
+  }
+
+  
+  // Quick auth buttons below pricing cards
+  const btnQuickVoucher = document.getElementById('btn-quick-voucher');
+  const btnQuickLogin = document.getElementById('btn-quick-login');
+  if (btnQuickVoucher) btnQuickVoucher.addEventListener('click', () => openLoginModal('voucher'));
+  if (btnQuickLogin) btnQuickLogin.addEventListener('click', () => openLoginModal('member'));
+
+  // ------------------------------------------------------------------------
+  // 6. FAQ Modal (No scroll needed)
+  // ------------------------------------------------------------------------
+  const faqModalScrim = document.getElementById('faq-modal-scrim');
+  const btnFooterFaq = document.getElementById('btn-footer-faq');
+  const btnCloseFaqModal = document.getElementById('btn-close-faq-modal');
+
+  function openFaqModal() {
+    faqModalScrim.classList.add('active');
+    faqModalScrim.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeFaqModal() {
+    faqModalScrim.classList.remove('active');
+    faqModalScrim.setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnFooterFaq) btnFooterFaq.addEventListener('click', openFaqModal);
+  if (btnCloseFaqModal) btnCloseFaqModal.addEventListener('click', closeFaqModal);
+  if (faqModalScrim) {
+    faqModalScrim.addEventListener('click', (e) => {
+      if (e.target === faqModalScrim) closeFaqModal();
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 7. Dynamic MAC & IP Telemetry Simulation & Query Parameter Handling
+  // ------------------------------------------------------------------------
+  const navIpDisplay = document.getElementById('nav-ip-display');
+  const navMacDisplay = document.getElementById('nav-mac-display');
+  const noticeMac = document.getElementById('notice-mac');
+
+  // Support URL search parameters for external hosting / testing (e.g. on GitHub Pages)
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramGateway = urlParams.get('gateway') || '';
+  const paramLoginOnly = urlParams.get('link-login-only') || urlParams.get('login-url') || '';
+  const paramMac = urlParams.get('mac') || '';
+  const paramIp = urlParams.get('ip') || '';
+  const paramError = urlParams.get('error') || '';
+
+  if (paramGateway) {
+    try { localStorage.setItem('airpulse_target_gateway', paramGateway); } catch (e) {}
+  }
+
+  function generateRandomMac() {
+    const hex = '0123456789ABCDEF';
+    let mac = '';
+    for (let i = 0; i < 6; i++) {
+      if (i > 0) mac += ':';
+      mac += hex[Math.floor(Math.random() * 16)] + hex[Math.floor(Math.random() * 16)];
+    }
+    return mac;
+  }
+
+  function resolveMikrotikValue(el, fallback) {
+    if (!el) return fallback;
+    const value = (el.textContent || '').trim();
+    if (!value || value.indexOf('$(') !== -1) {
+      el.textContent = fallback;
+      return fallback;
+    }
+    return value;
+  }
+
+  const fallbackMac = paramMac || generateRandomMac();
+  const fallbackIp = paramIp || `192.168.88.${Math.floor(Math.random() * 200) + 20}`;
+  const detectedMac = resolveMikrotikValue(navMacDisplay, fallbackMac);
+  const detectedIp = resolveMikrotikValue(navIpDisplay, fallbackIp);
+  if (noticeMac) {
+    const noticeVal = (noticeMac.textContent || '').trim();
+    if (!noticeVal || noticeVal.indexOf('$(') !== -1) noticeMac.textContent = detectedMac;
+  }
+
+  const errorBanner = document.getElementById('mt-error-banner');
+  if (errorBanner) {
+    const errText = (paramError || errorBanner.textContent || '').trim();
+    if (!errText || errText.indexOf('$(') !== -1) {
+      errorBanner.style.display = 'none';
+    } else {
+      errorBanner.textContent = errText;
+      errorBanner.style.display = 'block';
+    }
+  }
+
+  // ------------------------------------------------------------------------
+  // 8. Real-Time MikroTik Connection Diagnostics & Testing Suite
+  // ------------------------------------------------------------------------
+  const gatewayTestModalScrim = document.getElementById('gateway-test-modal-scrim');
+  const btnOpenGatewayTest = document.getElementById('btn-open-gateway-test');
+  const btnCloseGatewayTest = document.getElementById('btn-close-gateway-test');
+  const btnRunPingTest = document.getElementById('btn-run-ping-test');
+  const btnSaveGatewayIp = document.getElementById('btn-save-gateway-ip');
+  const gtGatewayInput = document.getElementById('gt-gateway-input');
+  const gtEnvLabel = document.getElementById('gt-env-label');
+  const gtLinkStatus = document.getElementById('gt-link-status');
+  const gtResultsBox = document.getElementById('gt-results-box');
+  const gtResultsContent = document.getElementById('gt-results-content');
+
+  const mtForm = document.getElementById('mikrotik-login-form');
+  const isRouterServed = mtForm && mtForm.getAttribute('action') && mtForm.getAttribute('action').indexOf('$(') === -1;
+  const isGitHubPages = window.location.hostname.endsWith('github.io');
+
+  function openGatewayTestModal() {
+    if (!gatewayTestModalScrim) return;
+    gatewayTestModalScrim.classList.add('active');
+    gatewayTestModalScrim.setAttribute('aria-hidden', 'false');
+
+    const savedGw = localStorage.getItem('airpulse_target_gateway') || (paramGateway || '192.168.88.1');
+    if (gtGatewayInput) gtGatewayInput.value = savedGw;
+
+    if (gtEnvLabel) {
+      if (isRouterServed) {
+        gtEnvLabel.textContent = 'RouterOS Native (Hotspot Storage)';
+        gtEnvLabel.style.color = 'var(--color-paper)';
+      } else if (isGitHubPages) {
+        gtEnvLabel.textContent = 'GitHub Pages (Remote Deployment)';
+        gtEnvLabel.style.color = 'var(--color-periwinkle-annotation)';
+      } else {
+        gtEnvLabel.textContent = 'Standalone / Local Testing';
+        gtEnvLabel.style.color = 'var(--color-ash)';
+      }
+    }
+
+    if (gtLinkStatus) {
+      gtLinkStatus.textContent = isRouterServed ? 'LIVE ON ROUTER' : 'STANDBY';
+    }
+  }
+
+  function closeGatewayTestModal() {
+    if (!gatewayTestModalScrim) return;
+    gatewayTestModalScrim.classList.remove('active');
+    gatewayTestModalScrim.setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnOpenGatewayTest) btnOpenGatewayTest.addEventListener('click', openGatewayTestModal);
+  if (btnCloseGatewayTest) btnCloseGatewayTest.addEventListener('click', closeGatewayTestModal);
+  if (gatewayTestModalScrim) {
+    gatewayTestModalScrim.addEventListener('click', (e) => {
+      if (e.target === gatewayTestModalScrim) closeGatewayTestModal();
+    });
+  }
+
+  // Also open diagnostics if the user clicks the hardware telemetry chip
+  const navTelemetryChip = document.querySelector('.hardware-telemetry-chip');
+  if (navTelemetryChip) {
+    navTelemetryChip.style.cursor = 'pointer';
+    navTelemetryChip.addEventListener('click', openGatewayTestModal);
+  }
+
+  if (btnSaveGatewayIp) {
+    btnSaveGatewayIp.addEventListener('click', () => {
+      const raw = gtGatewayInput ? gtGatewayInput.value.trim() : '192.168.88.1';
+      const clean = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      try {
+        localStorage.setItem('airpulse_target_gateway', clean);
+      } catch (e) {}
+
+      if (mtForm && (!mtForm.getAttribute('action') || mtForm.getAttribute('action').indexOf('$(') !== -1)) {
+        mtForm.setAttribute('action', `http://${clean}/login`);
+      }
+
+      if (gtResultsBox && gtResultsContent) {
+        gtResultsBox.style.display = 'block';
+        gtResultsContent.innerHTML = `<span style="color:#78d496;">&check; Saved gateway IP: <strong>${clean}</strong>. Portal will route authentication to http://${clean}/login</span>`;
+      }
+      playClickSound();
+      triggerHaptic(12);
+    });
+  }
+
+  if (btnRunPingTest) {
+    btnRunPingTest.addEventListener('click', async () => {
+      const raw = gtGatewayInput ? gtGatewayInput.value.trim() : '192.168.88.1';
+      const clean = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      const testUrl = `http://${clean}/login`;
+
+      if (gtResultsBox && gtResultsContent) {
+        gtResultsBox.style.display = 'block';
+        gtResultsContent.innerHTML = `<span>Probing gateway at <strong>${clean}</strong> via Backend Engine...</span>`;
+      }
+
+      const startTime = Date.now();
+
+      // First priority: Try backend real-time router diagnostic function
+      try {
+        const backendRes = await fetch('/api/router/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ host: clean, port: 8728, httpPort: 80 })
+        });
+
+        if (backendRes.ok) {
+          const data = await backendRes.json();
+          if (gtLinkStatus) {
+            gtLinkStatus.textContent = data.reachable ? 'ONLINE' : 'UNREACHABLE';
+            gtLinkStatus.style.color = data.reachable ? '#78d496' : '#e06c75';
+          }
+          if (gtResultsContent) {
+            gtResultsContent.innerHTML = `
+              <div style="color:${data.reachable ? '#78d496' : '#e06c75'};margin-bottom:6px;">
+                ${data.reachable ? '&check; MIKROTIK ROUTEROS GATEWAY RESPONDING' : '&times; GATEWAY CONNECTION TIMEOUT'}
+              </div>
+              <div>&bull; Host: <strong>${data.host}</strong> (Port ${data.port})</div>
+              <div>&bull; Latency: <strong>${data.latencyMs}ms</strong></div>
+              <div>&bull; RouterOS Version: <strong>${data.rosVersion || 'v7.x'}</strong></div>
+              <div>&bull; Active Hotspot Clients: <strong>${data.activeHotspotClients}</strong></div>
+              <div style="margin-top:6px;color:var(--color-ash);font-size:11px;">${data.message}</div>
+            `;
+          }
+          if (data.reachable) {
+            playSuccessChime();
+            triggerHaptic([15, 60, 25]);
+          } else {
+            triggerHaptic(30);
+          }
+          return;
+        }
+      } catch (backendErr) {
+        // Fallback to client browser probe
+      }
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+        // Standard HTTP probe to router login URL
+        await fetch(testUrl, {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        const latency = Date.now() - startTime;
+        if (gtLinkStatus) {
+          gtLinkStatus.textContent = 'ONLINE';
+          gtLinkStatus.style.color = '#78d496';
+        }
+        if (gtResultsContent) {
+          gtResultsContent.innerHTML = `
+            <div style="color:#78d496;margin-bottom:6px;">&check; MIKROTIK GATEWAY REACHABLE</div>
+            <div>&bull; Target IP: <strong>${clean}</strong></div>
+            <div>&bull; Latency: <strong>${latency}ms</strong></div>
+            <div>&bull; Endpoint: <strong>${testUrl}</strong> (HTTP 200/Redirect)</div>
+            <div style="margin-top:6px;color:var(--color-ash);">Your device is connected to the MikroTik LAN/WLAN. You can now test live voucher & M-Pesa logins directly!</div>
+          `;
+        }
+        playSuccessChime();
+        triggerHaptic([15, 60, 25]);
+      } catch (err) {
+        const latency = Date.now() - startTime;
+        const isTimeout = err.name === 'AbortError';
+        if (gtLinkStatus) {
+          gtLinkStatus.textContent = 'UNREACHABLE';
+          gtLinkStatus.style.color = '#e06c75';
+        }
+        if (gtResultsContent) {
+          gtResultsContent.innerHTML = `
+            <div style="color:#e06c75;margin-bottom:6px;">&times; COULD NOT REACH GATEWAY (${isTimeout ? 'Timed out after 3.5s' : 'Network error'})</div>
+            <div>&bull; Target: <strong>http://${clean}/login</strong></div>
+            <div style="margin-top:6px;color:var(--color-ash);">
+              <strong>Checklist:</strong><br>
+              1. Make sure your device is connected to the MikroTik Wi-Fi/Ethernet.<br>
+              2. Verify router IP (default is 192.168.88.1).<br>
+              3. Check that /ip hotspot service is active on the router.<br>
+              4. If testing through HTTPS, note that RouterOS standard login uses plain HTTP unless SSL certificate is installed.
+            </div>
+          `;
+        }
+        triggerHaptic(30);
+      }
+    });
+  }
+
+});
+
+  </script>
+</body>
+</html>

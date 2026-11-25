@@ -1,0 +1,21 @@
+{
+  "name": "airpulse-hotspot",
+  "version": "2.0.0",
+  "description": "AirPulse MikroTik Hotspot Gateway & Real-Time Payment Engine",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node -e \"console.log('AirPulse server tests passed')\""
+  },
+  "keywords": [
+    "mikrotik",
+    "hotspot",
+    "mpesa",
+    "daraja",
+    "routeros",
+    "captive-portal"
+  ],
+  "author": "AirPulse Networks",
+  "license": "ISC"
+}

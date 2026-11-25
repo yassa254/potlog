@@ -1,0 +1,30 @@
+[
+  {
+    "mac": "12:34:56:78:9A:BC",
+    "ip": "192.168.88.99",
+    "phone": "Direct Connect",
+    "plan": "3 Hours Pass",
+    "durationSeconds": 10800,
+    "startTime": 1795526128969,
+    "expiresAt": 1795536928969,
+    "gateway": "192.168.88.1",
+    "status": "active",
+    "voucherPin": "AP-TEST1",
+    "paymentRef": "AP-CON-303116",
+    "dataUsedMb": "0.0"
+  },
+  {
+    "mac": "BC:D0:74:12:34:56",
+    "ip": "192.168.88.55",
+    "phone": "254712345678",
+    "plan": "3 Hours Pass",
+    "durationSeconds": 10800,
+    "startTime": 1795526126437,
+    "expiresAt": 1795536926437,
+    "gateway": "192.168.88.1",
+    "status": "active",
+    "paymentRef": "NLYVBSCH72",
+    "voucherPin": "AP-TJ5YD",
+    "dataUsedMb": "8.3"
+  }
+]

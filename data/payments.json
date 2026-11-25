@@ -1,0 +1,18 @@
+[
+  {
+    "id": "NLYVBSCH72",
+    "name": "M-Pesa Client (712345678)",
+    "phone": "+254712345678",
+    "amount": 10,
+    "bank": "Equity Bank Kenya",
+    "account": "0180293847291",
+    "channel": "M-Pesa STK Push",
+    "mac": "BC:D0:74:12:34:56",
+    "ip": "192.168.88.55",
+    "plan": "3 Hours Pass — KES 10",
+    "status": "Completed",
+    "date": "2026-11-24T13:15:26.441Z",
+    "voucherPin": "AP-TJ5YD",
+    "deviceAuthorized": true
+  }
+]

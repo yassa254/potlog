@@ -1,0 +1,1031 @@
+/**
+ * AirPulse MikroTik Hotspot — Single Page M-Pesa Engine
+ * Exclusively M-Pesa STK Push payments, automated MikroTik session login,
+ * live timer tracking, and voucher redemption.
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // ------------------------------------------------------------------------
+  // 1. Audio-Haptic Feedback Engine
+  // ------------------------------------------------------------------------
+  let audioContext = null;
+
+  function initAudio() {
+    if (!audioContext) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) audioContext = new AudioCtx();
+    }
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+  }
+
+  function playClickSound() {
+    try {
+      initAudio();
+      if (!audioContext) return;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, audioContext.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.035);
+      gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.035);
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      osc.start();
+      osc.stop(audioContext.currentTime + 0.035);
+    } catch (e) {}
+  }
+
+  function playSuccessChime() {
+    try {
+      initAudio();
+      if (!audioContext) return;
+      const now = audioContext.currentTime;
+
+      // Note 1 (E6)
+      const osc1 = audioContext.createOscillator();
+      const gain1 = audioContext.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(1318.51, now);
+      gain1.gain.setValueAtTime(0.12, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc1.connect(gain1);
+      gain1.connect(audioContext.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.25);
+
+      // Note 2 (B6)
+      const osc2 = audioContext.createOscillator();
+      const gain2 = audioContext.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1975.53, now + 0.1);
+      gain2.gain.setValueAtTime(0.14, now + 0.1);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc2.connect(gain2);
+      gain2.connect(audioContext.destination);
+      osc2.start(now + 0.1);
+      osc2.stop(now + 0.5);
+    } catch (e) {}
+  }
+
+  function triggerHaptic(duration = 10) {
+    if (navigator.vibrate) {
+      try { navigator.vibrate(duration); } catch (e) {}
+    }
+  }
+
+  // Pointerdown feedback on interactive elements
+  document.querySelectorAll('button, .blueprint-card, .btn-plan-card, .btn-pill-outlined').forEach(el => {
+    el.addEventListener('pointerdown', () => {
+      playClickSound();
+      triggerHaptic(8);
+    }, { passive: true });
+  });
+
+  // ------------------------------------------------------------------------
+  // 2. 7 Hotspot Price Plans Configuration (Includes 10 for 3 Hours Starter)
+  // ------------------------------------------------------------------------
+  const pricingPlans = {
+    'plan-3h': {
+      id: 'plan-3h',
+      title: '3 Hours Pass',
+      price: 10,
+      duration: '3 Hours',
+      durationSeconds: 3 * 3600,
+      speed: '5 Mbps'
+    },
+    'plan-12h': {
+      id: 'plan-12h',
+      title: '12 Hours Pass',
+      price: 20,
+      duration: '12 Hours',
+      durationSeconds: 12 * 3600,
+      speed: '10 Mbps'
+    },
+    'plan-24h': {
+      id: 'plan-24h',
+      title: '24 Hours Pass',
+      price: 30,
+      duration: '24 Hours (1 Day)',
+      durationSeconds: 24 * 3600,
+      speed: '15 Mbps'
+    },
+    'plan-2d': {
+      id: 'plan-2d',
+      title: '2 Days Pass',
+      price: 50,
+      duration: '2 Days (48 Hours)',
+      durationSeconds: 48 * 3600,
+      speed: '20 Mbps'
+    },
+    'plan-5d': {
+      id: 'plan-5d',
+      title: '5 Days Pass',
+      price: 100,
+      duration: '5 Days (120 Hours)',
+      durationSeconds: 5 * 24 * 3600,
+      speed: '25 Mbps'
+    },
+    'plan-7d': {
+      id: 'plan-7d',
+      title: '7 Days Pro Pass',
+      price: 200,
+      duration: '7 Days (1 Week)',
+      durationSeconds: 7 * 24 * 3600,
+      speed: '30 Mbps'
+    },
+    'plan-monthly': {
+      id: 'plan-monthly',
+      title: 'Monthly Unlimited',
+      price: 700,
+      duration: '30 Days (Monthly)',
+      durationSeconds: 30 * 24 * 3600,
+      speed: '50 Mbps'
+    }
+  };
+
+  // ------------------------------------------------------------------------
+  // 3. M-Pesa Payment Sheet Management
+  // ------------------------------------------------------------------------
+  const paymentScrim = document.getElementById('payment-scrim');
+  const btnCloseSheet = document.getElementById('btn-close-sheet');
+
+  const sheetPlanTitle = document.getElementById('sheet-plan-title');
+  const summaryDuration = document.getElementById('summary-duration');
+  const summaryPriceAmount = document.getElementById('summary-price-amount');
+  const mpesaBtnText = document.getElementById('mpesa-btn-text');
+
+  const viewForm = document.getElementById('sheet-view-form');
+  const viewProcessing = document.getElementById('sheet-view-processing');
+  const viewSuccess = document.getElementById('sheet-view-success');
+
+  const progressBar = document.getElementById('payment-progress-bar');
+  const logStep1 = document.getElementById('log-step-1');
+  const logStep2 = document.getElementById('log-step-2');
+  const logStep3 = document.getElementById('log-step-3');
+
+  const receiptPlanName = document.getElementById('receipt-plan-name');
+  const receiptVoucherPin = document.getElementById('receipt-voucher-pin');
+  const receiptTimer = document.getElementById('receipt-timer');
+  const btnFinishAndBrowse = document.getElementById('btn-finish-and-browse');
+  const formMpesa = document.getElementById('form-mpesa');
+
+  let currentSelectedPlan = pricingPlans['plan-3h'];
+  let sessionTimerInterval = null;
+  let remainingSessionSeconds = 0;
+
+  function showSheetStep(step) {
+    viewForm.classList.remove('active');
+    viewProcessing.classList.remove('active');
+    viewSuccess.classList.remove('active');
+
+    if (step === 'form') viewForm.classList.add('active');
+    if (step === 'processing') viewProcessing.classList.add('active');
+    if (step === 'success') viewSuccess.classList.add('active');
+  }
+
+  // ------------------------------------------------------------------------
+  // 4. Real-Time Payment API & Gateway Configuration
+  // ------------------------------------------------------------------------
+  const PAYMENT_CONFIG_KEY = 'airpulse_payment_config';
+  const TUMA_CONFIG_KEY = PAYMENT_CONFIG_KEY;
+  const DB_STORAGE_KEY = 'airpulse_payment_records';
+  const CLIENTS_STORAGE_KEY = 'airpulse_client_devices';
+
+  function getTumaConfig() {
+    try {
+      const saved = localStorage.getItem(PAYMENT_CONFIG_KEY) || localStorage.getItem('airpulse_tuma_config');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      apiKey: 'live_daraja_key_849204',
+      shortcode: '174379',
+      bankName: 'Equity Bank Kenya',
+      accountNumber: '0180293847291',
+      accountName: 'AirPulse Hotspot Networks',
+      endpoint: '/api/payments'
+    };
+  }
+
+  function saveTumaConfig(cfg) {
+    try {
+      localStorage.setItem(PAYMENT_CONFIG_KEY, JSON.stringify(cfg));
+    } catch (e) {}
+  }
+
+  let tumaConfig = getTumaConfig();
+
+  // Populate config UI elements
+  const tumaApiKeyInput = document.getElementById('tuma-api-key');
+  const cfgOperatorBank = document.getElementById('cfg-operator-bank');
+  const cfgOperatorAccount = document.getElementById('cfg-operator-account');
+  const displayOperatorBankName = document.getElementById('operator-bank-name');
+  const displayOperatorAccountNum = document.getElementById('operator-account-num');
+  const displayOperatorAccountName = document.getElementById('operator-account-name');
+
+  function updateTumaUIFromConfig() {
+    if (displayOperatorBankName) displayOperatorBankName.textContent = tumaConfig.bankName;
+    if (displayOperatorAccountNum) displayOperatorAccountNum.textContent = tumaConfig.accountNumber;
+    if (displayOperatorAccountName) displayOperatorAccountName.textContent = tumaConfig.accountName;
+    if (tumaApiKeyInput) tumaApiKeyInput.value = tumaConfig.apiKey;
+    if (cfgOperatorBank) cfgOperatorBank.value = tumaConfig.bankName;
+    if (cfgOperatorAccount) cfgOperatorAccount.value = tumaConfig.accountNumber;
+  }
+
+  updateTumaUIFromConfig();
+
+  // Save config on changes
+  [tumaApiKeyInput, cfgOperatorBank, cfgOperatorAccount].forEach(el => {
+    if (el) {
+      el.addEventListener('change', () => {
+        tumaConfig.apiKey = tumaApiKeyInput ? tumaApiKeyInput.value.trim() : tumaConfig.apiKey;
+        tumaConfig.bankName = cfgOperatorBank ? cfgOperatorBank.value.trim() : tumaConfig.bankName;
+        tumaConfig.accountNumber = cfgOperatorAccount ? cfgOperatorAccount.value.trim() : tumaConfig.accountNumber;
+        saveTumaConfig(tumaConfig);
+        updateTumaUIFromConfig();
+      });
+    }
+  });
+
+  function openPaymentSheet(planId) {
+    const plan = pricingPlans[planId] || pricingPlans['plan-3h'] || pricingPlans['plan-12h'];
+    currentSelectedPlan = plan;
+
+    sheetPlanTitle.textContent = plan.title;
+    summaryDuration.textContent = plan.duration;
+    summaryPriceAmount.textContent = `KES ${plan.price}`;
+    if (mpesaBtnText) mpesaBtnText.textContent = `Pay with STK Push (KES ${plan.price})`;
+
+    showSheetStep('form');
+    paymentScrim.classList.add('active');
+    paymentScrim.setAttribute('aria-hidden', 'false');
+
+    setTimeout(() => {
+      const phoneInput = document.getElementById('mpesa-phone-input');
+      if (phoneInput) phoneInput.focus();
+    }, 150);
+  }
+
+  function closePaymentSheet() {
+    paymentScrim.classList.remove('active');
+    paymentScrim.setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnCloseSheet) {
+    btnCloseSheet.addEventListener('click', closePaymentSheet);
+  }
+
+  paymentScrim.addEventListener('click', (e) => {
+    if (e.target === paymentScrim) closePaymentSheet();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closePaymentSheet();
+      closeLoginModal();
+      closeFaqModal();
+    }
+  });
+
+  // Attach click listener to each of the 6 Button Cards
+  document.querySelectorAll('.blueprint-card, .btn-plan-card').forEach(card => {
+    const planId = card.getAttribute('data-plan-id');
+
+    card.addEventListener('click', () => {
+      openPaymentSheet(planId);
+    });
+
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openPaymentSheet(planId);
+      }
+    });
+  });
+
+  // Also support direct inner button clicks
+  document.querySelectorAll('[data-select-plan]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const planId = btn.getAttribute('data-select-plan');
+      openPaymentSheet(planId);
+    });
+  });
+
+  // ------------------------------------------------------------------------
+  // 5. Real-Time M-Pesa STK Push & Payment Execution Engine
+  // ------------------------------------------------------------------------
+  const receiptTumaRef = document.getElementById('receipt-tuma-ref') || document.getElementById('receipt-payment-ref');
+  const receiptPhoneDisplay = document.getElementById('receipt-phone-display');
+
+  if (formMpesa) {
+    formMpesa.addEventListener('submit', (e) => {
+      e.preventDefault();
+      executePaymentFlow();
+    });
+  }
+
+  async function pollPaymentStatus(paymentRef, checkoutId, timeoutMs = 90000) {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      try {
+        const q = new URLSearchParams();
+        if (paymentRef) q.set('ref', paymentRef);
+        if (checkoutId) q.set('checkoutId', checkoutId);
+        const res = await fetch('/api/payments/status?' + q.toString(), { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'Completed') return { ok: true, data };
+          if (data.status === 'Failed') return { ok: false, data, error: data.record?.error || 'Payment failed or was cancelled.' };
+        }
+      } catch (e) {}
+      await new Promise(r => setTimeout(r, 3000));
+    }
+    return { ok: false, error: 'Payment confirmation timed out. If you completed PIN entry, retry voucher/login after confirmation.' };
+  }
+
+  async function executePaymentFlow() {
+    const phoneInput = document.getElementById('mpesa-phone-input');
+    const rawPhone = phoneInput ? phoneInput.value.trim().replace(/^0/, '') : '';
+
+    if (!rawPhone || rawPhone.length < 9) {
+      alert('Please enter a valid mobile number (e.g. 712 345 678) to receive the M-Pesa STK prompt.');
+      return;
+    }
+
+    const fullPhone = '+254 ' + rawPhone;
+    const clientMac = navMacDisplay ? navMacDisplay.textContent.trim() : '4A:2B:8C:91:DE:3F';
+    const clientIp = navIpDisplay ? navIpDisplay.textContent.trim() : '192.168.88.145';
+    const storedGateway = localStorage.getItem('airpulse_target_gateway') || '192.168.88.1';
+
+    showSheetStep('processing');
+    progressBar.style.width = '20%';
+    logStep1.className = 'step-log-item active';
+    logStep2.className = 'step-log-item';
+    logStep3.className = 'step-log-item';
+    const procTitle = document.getElementById('processing-status-title');
+    const procDesc = document.getElementById('processing-status-desc');
+    if (procTitle) procTitle.textContent = 'Dispatching Tuma STK Push';
+    if (procDesc) procDesc.textContent = 'Sending secure M-Pesa STK prompt via Tuma gateway to your phone.';
+
+    let paymentData = null;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const res = await fetch('/api/payments/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: rawPhone,
+          planId: currentSelectedPlan.id,
+          amount: currentSelectedPlan.price,
+          mac: clientMac,
+          ip: clientIp,
+          gatewayHost: storedGateway
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      paymentData = await res.json().catch(() => null);
+      if (!res.ok || !paymentData?.success) {
+        throw new Error(paymentData?.error || `Payment initiation failed (HTTP ${res.status})`);
+      }
+    } catch (err) {
+      showSheetStep('form');
+      alert(err.name === 'AbortError' ? 'Payment gateway timed out. Check server connection and try again.' : (err.message || 'Payment initiation failed.'));
+      return;
+    }
+
+    progressBar.style.width = '55%';
+    logStep1.className = 'step-log-item completed';
+    logStep2.className = 'step-log-item active';
+    if (procTitle) procTitle.textContent = 'Awaiting M-Pesa PIN Confirmation';
+    if (procDesc) procDesc.textContent = `STK prompt sent to ${fullPhone}. Enter your M-Pesa PIN to complete payment to bank settlement.`;
+    triggerHaptic(15);
+
+    let finalStatus = paymentData;
+    if (String(paymentData.status).toUpperCase() === 'PENDING') {
+      const polled = await pollPaymentStatus(paymentData.paymentRef, paymentData.checkoutId);
+      if (!polled.ok) {
+        showSheetStep('form');
+        alert(polled.error || 'Payment was not confirmed.');
+        return;
+      }
+      finalStatus = { ...paymentData, ...polled.data, status: 'Completed' };
+    }
+
+    progressBar.style.width = '100%';
+    logStep2.className = 'step-log-item completed';
+    logStep3.className = 'step-log-item completed';
+
+    const paymentMeta = {
+      name: 'M-Pesa Client (' + rawPhone + ')',
+      phone: fullPhone,
+      bank: finalStatus.bank || tumaConfig.bankName,
+      account: finalStatus.account || tumaConfig.accountNumber,
+      channel: 'Tuma STK Push',
+      voucherPin: finalStatus.voucherPin || paymentData.voucherPin
+    };
+
+    finalizeHotspotLogin(finalStatus.paymentRef || paymentData.paymentRef, paymentMeta);
+  }
+
+  // Alias for backward compatibility
+  function executeTumaPaymentFlow() {
+    executePaymentFlow();
+  }
+
+  function generateVoucherPin() {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let code = 'AP-';
+    for (let i = 0; i < 5; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  function finalizeHotspotLogin(tumaRef, meta = {}) {
+    const voucherPin = meta.voucherPin || generateVoucherPin();
+    const clientMac = navMacDisplay ? navMacDisplay.textContent.trim() : '4A:2B:8C:91:DE:3F';
+    const clientIp = navIpDisplay ? navIpDisplay.textContent.trim() : '192.168.88.145';
+    const storedGateway = localStorage.getItem('airpulse_target_gateway') || '192.168.88.1';
+
+    receiptPlanName.textContent = currentSelectedPlan.title;
+    receiptVoucherPin.textContent = voucherPin;
+
+    if (receiptTumaRef) {
+      receiptTumaRef.textContent = tumaRef;
+    }
+
+    if (receiptPhoneDisplay) {
+      receiptPhoneDisplay.textContent = meta.phone || '+254 712 345 678';
+    }
+
+    remainingSessionSeconds = currentSelectedPlan.durationSeconds;
+    updateReceiptTimerDisplay();
+
+    // 1. Device authorization is handled by backend payment flow; only attempt direct connect for manual/voucher flows
+    if (String(tumaRef).startsWith('VOUCHER-') || String(tumaRef).startsWith('MEMBER-')) {
+      fetch('/api/devices/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mac: clientMac, ip: clientIp, planTitle: currentSelectedPlan.title,
+          durationSeconds: currentSelectedPlan.durationSeconds, voucherPin,
+          gatewayHost: storedGateway, phone: meta.phone || 'Direct Connect', paymentRef: tumaRef
+        })
+      }).catch(() => {});
+    }
+
+    // 2. Persist Transaction in airpulse_payment_records for Database & Dashboard
+    try {
+      let records = [];
+      const stored = localStorage.getItem(DB_STORAGE_KEY);
+      if (stored) records = JSON.parse(stored);
+      
+      const newRecord = {
+        id: tumaRef,
+        name: meta.name || 'AirPulse Client',
+        phone: meta.phone || '+254712345678',
+        amount: currentSelectedPlan.price,
+        bank: meta.bank || tumaConfig.bankName,
+        account: tumaConfig.accountNumber,
+        channel: meta.channel || 'M-Pesa STK Push',
+        mac: clientMac,
+        ip: clientIp,
+        plan: `${currentSelectedPlan.title} — KES ${currentSelectedPlan.price}`,
+        status: 'Completed',
+        date: new Date().toISOString(),
+        voucherPin: voucherPin
+      };
+
+      records.unshift(newRecord);
+      localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(records));
+    } catch (e) {
+      console.warn('Failed to persist payment record:', e);
+    }
+
+    // 3. Persist Client Lease in airpulse_client_devices for Device Manager
+    try {
+      let clientDevices = [];
+      const storedClients = localStorage.getItem(CLIENTS_STORAGE_KEY);
+      if (storedClients) clientDevices = JSON.parse(storedClients);
+
+      clientDevices = clientDevices.filter(c => c.mac !== clientMac);
+      clientDevices.unshift({
+        mac: clientMac,
+        ip: clientIp,
+        name: meta.name || 'Client Device',
+        hostname: 'Device-' + clientMac.slice(-5).replace(':', ''),
+        plan: currentSelectedPlan.title,
+        durationSeconds: currentSelectedPlan.durationSeconds,
+        startTime: Date.now(),
+        expiresAt: Date.now() + (currentSelectedPlan.durationSeconds * 1000),
+        gateway: storedGateway,
+        status: 'active',
+        dataUsedMb: (Math.random() * 15 + 4).toFixed(1),
+        paymentRef: tumaRef,
+        voucherPin: voucherPin
+      });
+
+      localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(clientDevices));
+    } catch (e) {
+      console.warn('Failed to persist client device:', e);
+    }
+
+    playSuccessChime();
+    triggerHaptic([20, 80, 40]);
+
+    showSheetStep('success');
+
+    // Show persistent bottom connected dock
+    showConnectedDock();
+
+    // Start countdown timer
+    startSessionTimer();
+
+    // Fill hidden MikroTik RouterOS form
+    const mtUsername = document.getElementById('mt-username');
+    const mtPassword = document.getElementById('mt-password');
+    if (mtUsername && mtPassword) {
+      mtUsername.value = voucherPin;
+      mtPassword.value = voucherPin;
+    }
+  }
+
+  function formatSeconds(totalSec) {
+    const hrs = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function updateReceiptTimerDisplay() {
+    if (receiptTimer) receiptTimer.textContent = formatSeconds(remainingSessionSeconds);
+    const dockTimer = document.getElementById('dock-timer-display');
+    if (dockTimer) dockTimer.textContent = `${formatSeconds(remainingSessionSeconds)} remaining`;
+  }
+
+  function startSessionTimer() {
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+
+    sessionTimerInterval = setInterval(() => {
+      if (remainingSessionSeconds > 0) {
+        remainingSessionSeconds--;
+        updateReceiptTimerDisplay();
+      } else {
+        clearInterval(sessionTimerInterval);
+        disconnectSession();
+      }
+    }, 1000);
+  }
+
+  function showConnectedDock() {
+    const dock = document.getElementById('active-session-dock');
+    if (dock) dock.classList.add('visible');
+  }
+
+  function hideConnectedDock() {
+    const dock = document.getElementById('active-session-dock');
+    if (dock) dock.classList.remove('visible');
+  }
+
+  function disconnectSession() {
+    if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+    hideConnectedDock();
+    triggerHaptic(20);
+  }
+
+  const btnDisconnectSession = document.getElementById('btn-disconnect-session');
+  if (btnDisconnectSession) {
+    btnDisconnectSession.addEventListener('click', disconnectSession);
+  }
+
+  function isMikrotikAction(action) {
+    return !!(action && action.indexOf('$(') === -1 && action.trim());
+  }
+
+  function submitMikrotikLogin(username, password) {
+    const user = (username || '').trim();
+    const pass = (password !== undefined && password !== null) ? password : user;
+    if (!user) return false;
+
+    // 1. Live MikroTik with HTTP-CHAP (active when $(if chap-id) is processed by RouterOS)
+    if (typeof doChapLogin === 'function') {
+      try {
+        return doChapLogin(user, pass);
+      } catch (err) {
+        console.warn('CHAP auth error, falling back to direct post:', err);
+      }
+    }
+
+    // 2. Live MikroTik with HTTP-PAP (direct POST via form name="login" or "sendin")
+    const form = document.login || document.getElementById('mikrotik-login-form');
+    if (form) {
+      const mtUsername = document.getElementById('mt-username') || form.username;
+      const mtPassword = document.getElementById('mt-password') || form.password;
+      if (mtUsername) mtUsername.value = user;
+      if (mtPassword) mtPassword.value = pass;
+
+      let action = form.getAttribute('action') || '';
+      if (isMikrotikAction(action)) {
+        form.submit();
+        return true;
+      }
+
+      // Stored target gateway override from Diagnostics modal
+      const storedGateway = localStorage.getItem('airpulse_target_gateway');
+      if (storedGateway) {
+        const cleanGw = storedGateway.replace(/^https?:\/\//, '').replace(/\/login.*$/, '').replace(/\/+$/, '');
+        form.setAttribute('action', 'http://' + cleanGw + '/login');
+        form.submit();
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  if (btnFinishAndBrowse) {
+    btnFinishAndBrowse.addEventListener('click', () => {
+      const pin = receiptVoucherPin ? receiptVoucherPin.textContent.trim() : '';
+      closePaymentSheet();
+      if (pin) submitMikrotikLogin(pin, pin);
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 5. Voucher & Member Login Modal
+  // ------------------------------------------------------------------------
+  const loginModalScrim = document.getElementById('login-modal-scrim');
+  const btnCloseLoginModal = document.getElementById('btn-close-login-modal');
+  const btnOpenVoucher = document.getElementById('btn-open-voucher');
+  const btnNavLogin = document.getElementById('btn-nav-login');
+
+  const modalTabVoucherBtn = document.getElementById('modal-tab-voucher-btn');
+  const modalTabMemberBtn = document.getElementById('modal-tab-member-btn');
+  const modalVoucherForm = document.getElementById('modal-voucher-form');
+  const modalMemberForm = document.getElementById('modal-member-form');
+
+  function openLoginModal(tab = 'voucher') {
+    loginModalScrim.classList.add('active');
+    loginModalScrim.setAttribute('aria-hidden', 'false');
+    switchLoginModalTab(tab);
+
+    setTimeout(() => {
+      const voucherInput = document.getElementById('direct-voucher-input');
+      if (voucherInput && tab === 'voucher') voucherInput.focus();
+    }, 150);
+  }
+
+  function closeLoginModal() {
+    loginModalScrim.classList.remove('active');
+    loginModalScrim.setAttribute('aria-hidden', 'true');
+  }
+
+  function switchLoginModalTab(tab) {
+    if (tab === 'voucher') {
+      modalTabVoucherBtn.classList.add('active');
+      modalTabMemberBtn.classList.remove('active');
+      modalVoucherForm.classList.add('active');
+      modalMemberForm.classList.remove('active');
+    } else {
+      modalTabMemberBtn.classList.add('active');
+      modalTabVoucherBtn.classList.remove('active');
+      modalMemberForm.classList.add('active');
+      modalVoucherForm.classList.remove('active');
+    }
+  }
+
+  if (btnOpenVoucher) btnOpenVoucher.addEventListener('click', () => openLoginModal('voucher'));
+  if (btnNavLogin) btnNavLogin.addEventListener('click', () => openLoginModal('member'));
+  if (btnCloseLoginModal) btnCloseLoginModal.addEventListener('click', closeLoginModal);
+  if (modalTabVoucherBtn) modalTabVoucherBtn.addEventListener('click', () => switchLoginModalTab('voucher'));
+  if (modalTabMemberBtn) modalTabMemberBtn.addEventListener('click', () => switchLoginModalTab('member'));
+
+  loginModalScrim.addEventListener('click', (e) => {
+    if (e.target === loginModalScrim) closeLoginModal();
+  });
+
+  if (modalVoucherForm) {
+    modalVoucherForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const voucherInput = document.getElementById('direct-voucher-input');
+      const pin = voucherInput && voucherInput.value.trim() ? voucherInput.value.trim().toUpperCase() : '';
+      if (!pin) return;
+      closeLoginModal();
+      if (submitMikrotikLogin(pin, pin)) return;
+      currentSelectedPlan = pricingPlans['plan-24h'];
+      finalizeHotspotLogin('VOUCHER-' + pin, {
+        name: 'Voucher User (' + pin + ')',
+        phone: 'Voucher Access',
+        channel: 'Voucher PIN Redemption'
+      });
+    });
+  }
+
+  if (modalMemberForm) {
+    modalMemberForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const memberInput = document.getElementById('member-username-input');
+      const memberPass = document.getElementById('member-password-input');
+      const username = memberInput && memberInput.value.trim() ? memberInput.value.trim() : '';
+      const password = memberPass ? memberPass.value : '';
+      if (!username || !password) return;
+      closeLoginModal();
+      if (submitMikrotikLogin(username, password)) return;
+      currentSelectedPlan = pricingPlans['plan-monthly'];
+      finalizeHotspotLogin('MEMBER-' + Date.now().toString(36).toUpperCase(), {
+        name: username + ' (Member)',
+        phone: 'Member Credential',
+        channel: 'Member Login'
+      });
+    });
+  }
+
+  
+  // Quick auth buttons below pricing cards
+  const btnQuickVoucher = document.getElementById('btn-quick-voucher');
+  const btnQuickLogin = document.getElementById('btn-quick-login');
+  if (btnQuickVoucher) btnQuickVoucher.addEventListener('click', () => openLoginModal('voucher'));
+  if (btnQuickLogin) btnQuickLogin.addEventListener('click', () => openLoginModal('member'));
+
+  // ------------------------------------------------------------------------
+  // 6. FAQ Modal (No scroll needed)
+  // ------------------------------------------------------------------------
+  const faqModalScrim = document.getElementById('faq-modal-scrim');
+  const btnFooterFaq = document.getElementById('btn-footer-faq');
+  const btnCloseFaqModal = document.getElementById('btn-close-faq-modal');
+
+  function openFaqModal() {
+    faqModalScrim.classList.add('active');
+    faqModalScrim.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeFaqModal() {
+    faqModalScrim.classList.remove('active');
+    faqModalScrim.setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnFooterFaq) btnFooterFaq.addEventListener('click', openFaqModal);
+  if (btnCloseFaqModal) btnCloseFaqModal.addEventListener('click', closeFaqModal);
+  if (faqModalScrim) {
+    faqModalScrim.addEventListener('click', (e) => {
+      if (e.target === faqModalScrim) closeFaqModal();
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 7. Dynamic MAC & IP Telemetry Simulation & Query Parameter Handling
+  // ------------------------------------------------------------------------
+  const navIpDisplay = document.getElementById('nav-ip-display');
+  const navMacDisplay = document.getElementById('nav-mac-display');
+  const noticeMac = document.getElementById('notice-mac');
+
+  // Support URL search parameters for external hosting / testing (e.g. on GitHub Pages)
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramGateway = urlParams.get('gateway') || '';
+  const paramLoginOnly = urlParams.get('link-login-only') || urlParams.get('login-url') || '';
+  const paramMac = urlParams.get('mac') || '';
+  const paramIp = urlParams.get('ip') || '';
+  const paramError = urlParams.get('error') || '';
+
+  if (paramGateway) {
+    try { localStorage.setItem('airpulse_target_gateway', paramGateway); } catch (e) {}
+  }
+
+  function generateRandomMac() {
+    const hex = '0123456789ABCDEF';
+    let mac = '';
+    for (let i = 0; i < 6; i++) {
+      if (i > 0) mac += ':';
+      mac += hex[Math.floor(Math.random() * 16)] + hex[Math.floor(Math.random() * 16)];
+    }
+    return mac;
+  }
+
+  function resolveMikrotikValue(el, fallback) {
+    if (!el) return fallback;
+    const value = (el.textContent || '').trim();
+    if (!value || value.indexOf('$(') !== -1) {
+      el.textContent = fallback;
+      return fallback;
+    }
+    return value;
+  }
+
+  const fallbackMac = paramMac || generateRandomMac();
+  const fallbackIp = paramIp || `192.168.88.${Math.floor(Math.random() * 200) + 20}`;
+  const detectedMac = resolveMikrotikValue(navMacDisplay, fallbackMac);
+  const detectedIp = resolveMikrotikValue(navIpDisplay, fallbackIp);
+  if (noticeMac) {
+    const noticeVal = (noticeMac.textContent || '').trim();
+    if (!noticeVal || noticeVal.indexOf('$(') !== -1) noticeMac.textContent = detectedMac;
+  }
+
+  const errorBanner = document.getElementById('mt-error-banner');
+  if (errorBanner) {
+    const errText = (paramError || errorBanner.textContent || '').trim();
+    if (!errText || errText.indexOf('$(') !== -1) {
+      errorBanner.style.display = 'none';
+    } else {
+      errorBanner.textContent = errText;
+      errorBanner.style.display = 'block';
+    }
+  }
+
+  // ------------------------------------------------------------------------
+  // 8. Real-Time MikroTik Connection Diagnostics & Testing Suite
+  // ------------------------------------------------------------------------
+  const gatewayTestModalScrim = document.getElementById('gateway-test-modal-scrim');
+  const btnOpenGatewayTest = document.getElementById('btn-open-gateway-test');
+  const btnCloseGatewayTest = document.getElementById('btn-close-gateway-test');
+  const btnRunPingTest = document.getElementById('btn-run-ping-test');
+  const btnSaveGatewayIp = document.getElementById('btn-save-gateway-ip');
+  const gtGatewayInput = document.getElementById('gt-gateway-input');
+  const gtEnvLabel = document.getElementById('gt-env-label');
+  const gtLinkStatus = document.getElementById('gt-link-status');
+  const gtResultsBox = document.getElementById('gt-results-box');
+  const gtResultsContent = document.getElementById('gt-results-content');
+
+  const mtForm = document.getElementById('mikrotik-login-form');
+  const isRouterServed = mtForm && mtForm.getAttribute('action') && mtForm.getAttribute('action').indexOf('$(') === -1;
+  const isGitHubPages = window.location.hostname.endsWith('github.io');
+
+  function openGatewayTestModal() {
+    if (!gatewayTestModalScrim) return;
+    gatewayTestModalScrim.classList.add('active');
+    gatewayTestModalScrim.setAttribute('aria-hidden', 'false');
+
+    const savedGw = localStorage.getItem('airpulse_target_gateway') || (paramGateway || '192.168.88.1');
+    if (gtGatewayInput) gtGatewayInput.value = savedGw;
+
+    if (gtEnvLabel) {
+      if (isRouterServed) {
+        gtEnvLabel.textContent = 'RouterOS Native (Hotspot Storage)';
+        gtEnvLabel.style.color = 'var(--color-paper)';
+      } else if (isGitHubPages) {
+        gtEnvLabel.textContent = 'GitHub Pages (Remote Deployment)';
+        gtEnvLabel.style.color = 'var(--color-periwinkle-annotation)';
+      } else {
+        gtEnvLabel.textContent = 'Standalone / Local Testing';
+        gtEnvLabel.style.color = 'var(--color-ash)';
+      }
+    }
+
+    if (gtLinkStatus) {
+      gtLinkStatus.textContent = isRouterServed ? 'LIVE ON ROUTER' : 'STANDBY';
+    }
+  }
+
+  function closeGatewayTestModal() {
+    if (!gatewayTestModalScrim) return;
+    gatewayTestModalScrim.classList.remove('active');
+    gatewayTestModalScrim.setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnOpenGatewayTest) btnOpenGatewayTest.addEventListener('click', openGatewayTestModal);
+  if (btnCloseGatewayTest) btnCloseGatewayTest.addEventListener('click', closeGatewayTestModal);
+  if (gatewayTestModalScrim) {
+    gatewayTestModalScrim.addEventListener('click', (e) => {
+      if (e.target === gatewayTestModalScrim) closeGatewayTestModal();
+    });
+  }
+
+  // Also open diagnostics if the user clicks the hardware telemetry chip
+  const navTelemetryChip = document.querySelector('.hardware-telemetry-chip');
+  if (navTelemetryChip) {
+    navTelemetryChip.style.cursor = 'pointer';
+    navTelemetryChip.addEventListener('click', openGatewayTestModal);
+  }
+
+  if (btnSaveGatewayIp) {
+    btnSaveGatewayIp.addEventListener('click', () => {
+      const raw = gtGatewayInput ? gtGatewayInput.value.trim() : '192.168.88.1';
+      const clean = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      try {
+        localStorage.setItem('airpulse_target_gateway', clean);
+      } catch (e) {}
+
+      if (mtForm && (!mtForm.getAttribute('action') || mtForm.getAttribute('action').indexOf('$(') !== -1)) {
+        mtForm.setAttribute('action', `http://${clean}/login`);
+      }
+
+      if (gtResultsBox && gtResultsContent) {
+        gtResultsBox.style.display = 'block';
+        gtResultsContent.innerHTML = `<span style="color:#78d496;">&check; Saved gateway IP: <strong>${clean}</strong>. Portal will route authentication to http://${clean}/login</span>`;
+      }
+      playClickSound();
+      triggerHaptic(12);
+    });
+  }
+
+  if (btnRunPingTest) {
+    btnRunPingTest.addEventListener('click', async () => {
+      const raw = gtGatewayInput ? gtGatewayInput.value.trim() : '192.168.88.1';
+      const clean = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      const testUrl = `http://${clean}/login`;
+
+      if (gtResultsBox && gtResultsContent) {
+        gtResultsBox.style.display = 'block';
+        gtResultsContent.innerHTML = `<span>Probing gateway at <strong>${clean}</strong> via Backend Engine...</span>`;
+      }
+
+      const startTime = Date.now();
+
+      // First priority: Try backend real-time router diagnostic function
+      try {
+        const backendRes = await fetch('/api/router/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ host: clean, port: 8728, httpPort: 80 })
+        });
+
+        if (backendRes.ok) {
+          const data = await backendRes.json();
+          if (gtLinkStatus) {
+            gtLinkStatus.textContent = data.reachable ? 'ONLINE' : 'UNREACHABLE';
+            gtLinkStatus.style.color = data.reachable ? '#78d496' : '#e06c75';
+          }
+          if (gtResultsContent) {
+            gtResultsContent.innerHTML = `
+              <div style="color:${data.reachable ? '#78d496' : '#e06c75'};margin-bottom:6px;">
+                ${data.reachable ? '&check; MIKROTIK ROUTEROS GATEWAY RESPONDING' : '&times; GATEWAY CONNECTION TIMEOUT'}
+              </div>
+              <div>&bull; Host: <strong>${data.host}</strong> (Port ${data.port})</div>
+              <div>&bull; Latency: <strong>${data.latencyMs}ms</strong></div>
+              <div>&bull; RouterOS Version: <strong>${data.rosVersion || 'v7.x'}</strong></div>
+              <div>&bull; Active Hotspot Clients: <strong>${data.activeHotspotClients}</strong></div>
+              <div style="margin-top:6px;color:var(--color-ash);font-size:11px;">${data.message}</div>
+            `;
+          }
+          if (data.reachable) {
+            playSuccessChime();
+            triggerHaptic([15, 60, 25]);
+          } else {
+            triggerHaptic(30);
+          }
+          return;
+        }
+      } catch (backendErr) {
+        // Fallback to client browser probe
+      }
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+        // Standard HTTP probe to router login URL
+        await fetch(testUrl, {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        const latency = Date.now() - startTime;
+        if (gtLinkStatus) {
+          gtLinkStatus.textContent = 'ONLINE';
+          gtLinkStatus.style.color = '#78d496';
+        }
+        if (gtResultsContent) {
+          gtResultsContent.innerHTML = `
+            <div style="color:#78d496;margin-bottom:6px;">&check; MIKROTIK GATEWAY REACHABLE</div>
+            <div>&bull; Target IP: <strong>${clean}</strong></div>
+            <div>&bull; Latency: <strong>${latency}ms</strong></div>
+            <div>&bull; Endpoint: <strong>${testUrl}</strong> (HTTP 200/Redirect)</div>
+            <div style="margin-top:6px;color:var(--color-ash);">Your device is connected to the MikroTik LAN/WLAN. You can now test live voucher & M-Pesa logins directly!</div>
+          `;
+        }
+        playSuccessChime();
+        triggerHaptic([15, 60, 25]);
+      } catch (err) {
+        const latency = Date.now() - startTime;
+        const isTimeout = err.name === 'AbortError';
+        if (gtLinkStatus) {
+          gtLinkStatus.textContent = 'UNREACHABLE';
+          gtLinkStatus.style.color = '#e06c75';
+        }
+        if (gtResultsContent) {
+          gtResultsContent.innerHTML = `
+            <div style="color:#e06c75;margin-bottom:6px;">&times; COULD NOT REACH GATEWAY (${isTimeout ? 'Timed out after 3.5s' : 'Network error'})</div>
+            <div>&bull; Target: <strong>http://${clean}/login</strong></div>
+            <div style="margin-top:6px;color:var(--color-ash);">
+              <strong>Checklist:</strong><br>
+              1. Make sure your device is connected to the MikroTik Wi-Fi/Ethernet.<br>
+              2. Verify router IP (default is 192.168.88.1).<br>
+              3. Check that /ip hotspot service is active on the router.<br>
+              4. If testing through HTTPS, note that RouterOS standard login uses plain HTTP unless SSL certificate is installed.
+            </div>
+          `;
+        }
+        triggerHaptic(30);
+      }
+    });
+  }
+
+});

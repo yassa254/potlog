@@ -1,0 +1,36 @@
+{
+  "gatewayMode": "live",
+  "provider": "tuma_api",
+  "tuma": {
+    "apiKey": "tuma_live_sec_hotspot_gateway_01",
+    "merchantId": "TUMA-MCH-8820",
+    "endpoint": "https://api.tuma.co.ke/v1",
+    "environment": "production",
+    "callbackUrl": "https://wifi.airpulse.net/api/payments/callback"
+  },
+  "daraja": {
+    "environment": "sandbox",
+    "consumerKey": "",
+    "consumerSecret": "",
+    "businessShortCode": "174379",
+    "passkey": "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+    "transactionType": "CustomerPayBillOnline",
+    "callbackUrl": "https://wifi.airpulse.net/api/payments/callback",
+    "accountReference": "AirPulseHotspot"
+  },
+  "settlement": {
+    "bankName": "Equity Bank Kenya",
+    "accountNumber": "0180293847291",
+    "accountName": "AirPulse Hotspot Networks Ltd",
+    "bankCode": "068",
+    "autoSettle": true
+  },
+  "defaultRouter": {
+    "host": "192.168.88.1",
+    "port": 8728,
+    "httpPort": 80,
+    "username": "admin",
+    "password": "",
+    "hotspotServer": "hotspot1"
+  }
+}

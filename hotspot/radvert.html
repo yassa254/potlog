@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>AirPulse // Advertisement</title>
+<meta http-equiv="refresh" content="2; url=$(link-orig)">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="-1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<script language="JavaScript">
+<!--
+var popup = '';
+function openOrig() {
+  if (window.focus) popup.focus();
+  location.href = '$(link-orig)';
+}
+function openAd() {
+  location.href = '$(link-redirect)';
+}
+function openAdvert() {
+  if (window.name != 'hotspot_advert') {
+    popup = open('$(link-redirect)', 'hotspot_advert', '');
+    setTimeout("openOrig()", 1000);
+    return;
+  }
+  setTimeout("openAd()", 1000);
+}
+//-->
+</script>
+</head>
+<body class="single-page-body" onLoad="openAdvert()">
+  <main class="single-page-main">
+    <div class="portal-blueprint-container">
+      <div class="dashed-section-primitive" style="text-align:center;padding:clamp(24px, 5vh, 40px) clamp(12px, 3vw, 24px);">
+        <h1 class="blueprint-display-headline" style="font-size:clamp(20px, 5vw, 28px);">SPONSOR ADVERTISEMENT</h1>
+        <p class="blueprint-subtext">Loading sponsor message. If nothing happens automatically, click below:</p>
+        <a class="btn-submit-blueprint" href="$(link-redirect)" target="hotspot_advert" style="display:inline-flex;margin-top:16px;text-decoration:none;min-height:44px;align-items:center;padding:0 24px;">
+          <span>Open Advertisement &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

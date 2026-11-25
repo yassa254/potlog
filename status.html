@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AirPulse // Session Status</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="single-page-body">
+  <header class="app-header">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand" style="text-decoration:none;">
+        <span class="brand-bracket-mark">[ &bull; ]</span>
+        <span class="brand-title">AirPulse</span>
+        <span class="brand-slash">/</span>
+        <span class="brand-subtag">Session</span>
+      </a>
+    </div>
+  </header>
+  <main class="single-page-main">
+    <div class="portal-blueprint-container">
+      <div class="dashed-section-primitive" style="padding:clamp(16px, 4vh, 28px) clamp(10px, 2.5vw, 24px);">
+        <div class="blueprint-header-stack" style="text-align:center;">
+          <div class="eyebrow-chip" style="margin:0 auto 12px;">
+            <span class="eyebrow-pen">&bull;</span>
+            <span>HOTSPOT STATUS // $(identity)</span>
+          </div>
+          <h1 class="blueprint-display-headline" style="font-size:clamp(22px, 6vw, 32px);">YOU ARE ONLINE.</h1>
+        </div>
+        <div class="receipt-card" style="margin:16px auto;max-width:420px;width:100%;box-sizing:border-box;">
+          <div class="receipt-row"><span>USER</span><strong style="word-break:break-all;">$(username)</strong></div>
+          <div class="receipt-row"><span>IP</span><strong style="word-break:break-all;">$(ip)</strong></div>
+          <div class="receipt-row"><span>MAC</span><strong style="word-break:break-all;">$(mac)</strong></div>
+          <div class="receipt-row"><span>BYTES UP / DOWN</span><strong style="word-break:break-all;">$(bytes-in-nice) / $(bytes-out-nice)</strong></div>
+          <div class="receipt-row"><span>CONNECTED</span><strong style="word-break:break-all;">$(uptime)</strong></div>
+          <div class="receipt-row"><span>SESSION TIME LEFT</span><strong style="word-break:break-all;color:var(--color-periwinkle-annotation);">$(session-time-left)</strong></div>
+        </div>
+        <form action="$(link-logout)" method="post" style="text-align:center;">
+          <input type="hidden" name="erase-cookie" value="true">
+          <button type="submit" class="btn-submit-blueprint" style="max-width:280px;width:100%;margin:0 auto;min-height:44px;">
+            <span>Log Out &amp; End Session</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

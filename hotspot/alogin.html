@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="2; url=$(link-redirect)">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="expires" content="-1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AirPulse // Connected</title>
+  <link rel="stylesheet" href="style.css">
+  <script language="JavaScript">
+  <!--
+  function startClock() {
+    $(if popup == 'true')
+    open('$(link-status)', 'hotspot_status', 'toolbar=0,location=0,directories=0,status=0,menubars=0,resizable=1,width=340,height=480');
+    $(endif)
+    location.href = '$(link-redirect)';
+  }
+  //-->
+  </script>
+</head>
+<body class="single-page-body" onload="startClock()">
+  <main class="single-page-main">
+    <div class="portal-blueprint-container">
+      <div class="dashed-section-primitive" style="text-align:center;padding:clamp(24px, 5vh, 40px) clamp(12px, 3vw, 24px);">
+        <div class="success-check-mark">&check;</div>
+        <h1 class="blueprint-display-headline" style="font-size:clamp(22px, 6vw, 32px);">SESSION LIVE.</h1>
+        <p class="blueprint-subtext">You are authenticated on $(identity). Opening the internet...</p>
+        <p class="input-helper" style="word-break:break-word;">User: <strong>$(username)</strong> &bull; IP: $(ip) &bull; MAC: $(mac)</p>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <a class="btn-submit-blueprint" href="$(link-redirect)" style="display:inline-flex;text-decoration:none;min-height:44px;align-items:center;padding:0 24px;">
+            <span>Continue to Internet &rarr;</span>
+          </a>
+          <a class="btn-card-action" href="$(link-status)" target="hotspot_status" style="display:inline-flex;text-decoration:none;min-height:44px;align-items:center;padding:0 18px;">
+            <span>View Session Status</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

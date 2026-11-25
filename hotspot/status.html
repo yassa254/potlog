@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AirPulse // Session Status</title>
+  $(if refresh-timeout)
+  <meta http-equiv="refresh" content="$(refresh-timeout-secs)">
+  $(endif)
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="expires" content="-1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="stylesheet" href="style.css">
+  <script language="JavaScript">
+  <!--
+  $(if advert-pending == 'yes')
+      var popup = '';
+      function focusAdvert() {
+        if (window.focus) popup.focus();
+      }
+      function openAdvert() {
+        popup = open('$(link-advert)', 'hotspot_advert', '');
+        setTimeout("focusAdvert()", 1000);
+      }
+  $(endif)
+      function openLogout() {
+        if (window.name != 'hotspot_status') return true;
+        open('$(link-logout)', 'hotspot_logout', 'toolbar=0,location=0,directories=0,status=0,menubars=0,resizable=1,width=340,height=440');
+        window.close();
+        return false;
+      }
+  //-->
+  </script>
+</head>
+<body class="single-page-body" $(if advert-pending == 'yes') onLoad="openAdvert()" $(endif)>
+  <header class="app-header">
+    <div class="nav-container">
+      <a href="$(link-status)" class="nav-brand" style="text-decoration:none;">
+        <span class="brand-bracket-mark">[ &bull; ]</span>
+        <span class="brand-title">AirPulse</span>
+        <span class="brand-slash">/</span>
+        <span class="brand-subtag">Status</span>
+      </a>
+      <div class="hardware-telemetry-chip">
+        <span class="node-dot"></span>
+        <span>SYS // 5GHZ</span>
+        <span class="chip-sep">:</span>
+        <span>IP: <strong class="chip-val">$(ip)</strong></span>
+        <span class="chip-sep">&bull;</span>
+        <span class="chip-accent">ONLINE</span>
+      </div>
+    </div>
+  </header>
+  <main class="single-page-main">
+    <div class="portal-blueprint-container">
+      <div class="dashed-section-primitive" style="padding:clamp(16px, 4vh, 28px) clamp(10px, 2.5vw, 24px);">
+        <div class="blueprint-header-stack" style="text-align:center;">
+          <div class="eyebrow-chip" style="margin:0 auto 12px;">
+            <span class="eyebrow-pen">&bull;</span>
+            <span>HOTSPOT STATUS // $(identity)</span>
+          </div>
+          <h1 class="blueprint-display-headline" style="font-size:clamp(22px, 6vw, 32px);">YOU ARE ONLINE.</h1>
+          $(if login-by == 'trial')
+          <p style="color:#7dd3fc;margin:6px 0 0;font-size:14px;font-family:var(--font-geist-mono);">&bull; Welcome Free Trial User &bull;</p>
+          $(elif login-by != 'mac')
+          <p style="color:var(--color-paper);margin:6px 0 0;font-size:14px;font-family:var(--font-geist-mono);">&bull; Welcome, <strong>$(username)</strong> &bull;</p>
+          $(endif)
+        </div>
+
+        <div class="receipt-card" style="margin:16px auto;max-width:420px;width:100%;box-sizing:border-box;">
+          <div class="receipt-row"><span>USER ACCOUNT</span><strong style="word-break:break-all;">$(username)</strong></div>
+          <div class="receipt-row"><span>IP ADDRESS</span><strong style="word-break:break-all;">$(ip)</strong></div>
+          <div class="receipt-row"><span>MAC ADDRESS</span><strong style="word-break:break-all;">$(mac)</strong></div>
+          <div class="receipt-row"><span>DATA TRANSFERRED</span><strong style="word-break:break-all;">$(bytes-in-nice) &uarr; / $(bytes-out-nice) &darr;</strong></div>
+          <div class="receipt-row"><span>UPTIME / CONNECTED</span><strong style="word-break:break-all;">$(uptime)</strong></div>
+          <div class="receipt-row"><span>SESSION TIME LEFT</span><strong style="word-break:break-all;color:var(--color-periwinkle-annotation);">$(if session-time-left)$(session-time-left)$(else)Unlimited$(endif)</strong></div>
+          $(if blocked == 'yes')
+          <div class="receipt-row" style="color:#f87171;">
+            <span>STATUS</span>
+            <strong><a href="$(link-advert)" target="hotspot_advert" style="color:#f87171;text-decoration:underline;">Advertisement Required</a></strong>
+          </div>
+          $(elif refresh-timeout)
+          <div class="receipt-row">
+            <span>AUTO REFRESH</span>
+            <strong style="color:var(--color-ash);">Every $(refresh-timeout)</strong>
+          </div>
+          $(endif)
+        </div>
+
+        $(if login-by-mac != 'yes')
+        <form action="$(link-logout)" name="logout" onSubmit="return openLogout()" style="text-align:center;margin-top:16px;">
+          <input type="hidden" name="erase-cookie" value="true">
+          <button type="submit" class="btn-submit-blueprint" style="max-width:280px;width:100%;margin:0 auto;min-height:44px;">
+            <span>Log Out &amp; End Session</span>
+          </button>
+        </form>
+        $(endif)
+      </div>
+    </div>
+  </main>
+</body>
+</html>

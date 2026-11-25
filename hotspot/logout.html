@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="expires" content="-1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AirPulse // Logged Out</title>
+  <link rel="stylesheet" href="style.css">
+  <script language="JavaScript">
+  <!--
+  function openLogin() {
+    if (window.name != 'hotspot_logout') return true;
+    open('$(link-login)', '_blank', '');
+    window.close();
+    return false;
+  }
+  //-->
+  </script>
+</head>
+<body class="single-page-body">
+  <main class="single-page-main">
+    <div class="portal-blueprint-container">
+      <div class="dashed-section-primitive" style="text-align:center;padding:clamp(24px, 5vh, 40px) clamp(12px, 3vw, 24px);">
+        <h1 class="blueprint-display-headline" style="font-size:clamp(22px, 6vw, 32px);">SESSION ENDED.</h1>
+        <p class="blueprint-subtext">You have been logged out of $(identity). Your session summary is below:</p>
+
+        <div class="receipt-card" style="margin:16px auto;max-width:420px;width:100%;box-sizing:border-box;text-align:left;">
+          <div class="receipt-row"><span>USER</span><strong style="word-break:break-all;">$(username)</strong></div>
+          <div class="receipt-row"><span>IP ADDRESS</span><strong style="word-break:break-all;">$(ip)</strong></div>
+          <div class="receipt-row"><span>MAC ADDRESS</span><strong style="word-break:break-all;">$(mac)</strong></div>
+          <div class="receipt-row"><span>SESSION DURATION</span><strong style="word-break:break-all;">$(uptime)</strong></div>
+          $(if session-time-left)
+          <div class="receipt-row"><span>TIME REMAINING</span><strong style="word-break:break-all;color:var(--color-periwinkle-annotation);">$(session-time-left)</strong></div>
+          $(endif)
+          <div class="receipt-row"><span>DATA TRANSFERRED</span><strong style="word-break:break-all;">$(bytes-in-nice) &uarr; / $(bytes-out-nice) &darr;</strong></div>
+        </div>
+
+        <form action="$(link-login)" name="login" onSubmit="return openLogin()" style="margin-top:16px;">
+          <button type="submit" class="btn-submit-blueprint" style="max-width:280px;width:100%;margin:0 auto;min-height:44px;display:inline-flex;align-items:center;justify-content:center;">
+            <span>Log In Again</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
